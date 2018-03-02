@@ -42,7 +42,7 @@ public struct User{
     string name;
     string displayName;
     string emailAddress;
-    map avatarUrls;
+    json avatarUrls;
     boolean active;
     string timeZone;
     string locale;

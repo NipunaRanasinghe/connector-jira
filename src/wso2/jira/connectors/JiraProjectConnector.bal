@@ -16,16 +16,17 @@
 // under the License.
 
 
-package src.wso2.jira;
+package src.wso2.jira.connectors;
+
 import ballerina.net.http;
 import src.wso2.jira.models;
 import ballerina.io;
 import ballerina.collections;
 import src.wso2.jira.utils.constants;
+import ballerina.config;
 
 @Description {value: "Jira client connector"}
-
-public connector jiraConnector () {
+public connector jiraProjectConnector (http:HttpClient httpClient) {
 
     //creates HttpClient Endpoint
     endpoint <http:HttpClient> jiraEndpoint {
@@ -62,8 +63,7 @@ public connector jiraConnector () {
     }
 
 
-
-    action getProjectSummarybyId(string id) (ProjectSummary, error){
+    action getProject(string projectIdOrKey) (ProjectSummary, error){
         http:OutRequest request = {};
         http:InResponse response = {};
         ProjectSummary project;
@@ -71,7 +71,7 @@ public connector jiraConnector () {
         json jsonResponse;
         constructAuthHeader(request);
 
-        response, httpError = jiraEndpoint.get("/project/" + id, request);
+        response, httpError = jiraEndpoint.get("/project/" + projectIdOrKey, request);
         jsonResponse,e = validateResponse(response, httpError);
 
         if (e!=null) {
@@ -86,10 +86,45 @@ public connector jiraConnector () {
     }
 
 
+    action getProjectRole(string projectIdOrKey,string roleId)(ProjectRole,error){
+        http:OutRequest request = {};
+        http:InResponse response = {};
+        //ProjectRole role;
 
+        error e = {message:"" ,cause:null};
+        json jsonResponse;
+        json[] jsonResponseArray = [];
+        constructAuthHeader(request);
+
+        response, httpError = jiraEndpoint.get("/project/" + projectIdOrKey+"/role/"+roleId, request);
+        jsonResponse,e = validateResponse(response, httpError);
+
+        if (e!=null) {
+            return null,e;
+        }
+
+        else{
+            var role,e = <ProjectRole>jsonResponse;
+
+
+
+            //int x =0;
+            //foreach (resource in jsonResponse){
+            //    io:println(i);
+            //    roles[x],e = <Role>i;
+            //    x=x+1;
+            //}
+            return null,e;
+        }
+
+    }
 }
 
 
+
+//*************************************************
+//  Functions
+//*************************************************
 @Description {value:"Construct the request headers"}
 @Param {value:"request: The http request object"}
 function constructAuthHeader (http:OutRequest request) {
@@ -128,23 +163,25 @@ function validateResponse(http:InResponse response, http:HttpConnectorError http
 }
 
 
+
+
+
+
 //*************************************************
 //  Struct Templates
 //*************************************************
 // #TODO Move these structs to another package once https://github.com/ballerina-lang/ballerina/issues/4736 is fixed.
 
 
-
-struct BasicAuth{
+struct BasicAuth {
     string username;
     string password;
 }
 
 
-struct BasicAuthBase64{
+struct BasicAuthBase64 {
     string token;
 }
-
 
 
 public struct ProjectSummary {
@@ -157,10 +194,26 @@ public struct ProjectSummary {
 }
 
 
-
 public struct ProjectCategory {
     string self;
     string id;
     string name;
     string description;
 }
+
+
+
+public struct ProjectRole {
+    string self;
+    string name;
+    string description;
+    Actor[] actors;
+}
+
+public struct Actor {
+    string id;
+    string name;
+    string dispalyName;
+    string |type|;
+}
+

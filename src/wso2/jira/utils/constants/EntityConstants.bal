@@ -1,5 +1,8 @@
 package src.wso2.jira.utils.constants;
 
+
+public const string  ROLE_ID_DEVELOPERS = "10001";
+
 //const string ENT_PRODUCTS_PRODUCT_NAME = "product_name";
 //const string ENT_PRODUCTS_PRODUCT_VERSION = "product_version";
 //const string ENT_PRODUCTS_DOWNLOAD_PATH = "download_path_param";
