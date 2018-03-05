@@ -66,7 +66,7 @@ public connector JiraConnector (Authentication authType) {
 
     //@Description {value:"Get Jira Project information"}
     //@Param {value: "string containing the unique key/id of the project"}
-    action getProject (string projectIdOrKey) (ProjectSummary, error) {
+    action getProjectSummary (string projectIdOrKey) (ProjectSummary, error) {
         http:OutRequest request = {};
         http:InResponse response = {};
         ProjectSummary project;
