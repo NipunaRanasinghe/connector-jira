@@ -16,9 +16,8 @@ public function main (string[] args) {
     //}
 
     endpoint <jira:JiraConnector> jiraConnector {
-        create jira:JiraConnector();
+        create jira:JiraConnector(jira:AuthenticationType.BASIC);
     }
-
    // models:ProjectPointer[] pointer;
     error  e;
 
@@ -29,7 +28,7 @@ public function main (string[] args) {
 
 
 
-    //var pointer, e =  jiraConnector.getProjectSummarybyId("10314");
+    //var pointer, e =  jiraConnector.getProjectSummary("10314");
     //io:println(pointer);
     //io:println(e);
 
@@ -39,8 +38,14 @@ public function main (string[] args) {
     //io:println(e);
 
 
-    var pointer, e =  jiraConnector.getProjectStatuses("10314");
-    io:println(pointer[0]);
+    //var pointer, e =  jiraConnector.getProjectStatuses("10314");
+    //io:println(pointer[0]);
+    //io:println(e);
+
+    jira:SetActor newActor = {name:"jira-developers",|type|:jira:ActorType.GROUP};
+
+    var pointer, e =  jiraConnector.addActorToProject("10314",constants:ROLE_ID_DEVELOPERS,newActor);
+    io:println(pointer);
     io:println(e);
 
 

@@ -28,7 +28,7 @@ import ballerina.config;
 
 
 @Description {value: "Jira client connector"}
-public connector JiraConnector (Authentication authType) {
+public connector JiraConnector (AuthenticationType authType) {
 
     //creates HttpClient Endpoint
     endpoint<http:HttpClient> jiraEndpoint {
@@ -156,9 +156,48 @@ public connector JiraConnector (Authentication authType) {
         }
 
 
+    @Description {value:"Updates a project role to include the specified actors (users or groups)"}
+    action addActorToProject(string projectIdOrKey,string projectRoleId,SetActor newActor)(boolean, error){
+        http:OutRequest request = {};
+        http:InResponse response = {};
+        ProjectSummary project;
+        error e = {message:"", cause:null};
+        json jsonPayload;
+        json jsonResponse;
 
-    action addActorToProject(string projectIdOrKey,string projectRoleId,SetActor newActor){
+        constructAuthHeader(authType,request);
 
+        json payload = models:addActorToProjectSchema;
+
+        payload.id,_ = <int>projectRoleId;
+
+        if(newActor.|type|==ActorType.USER) {
+            payload.categorisedActors.|atlassian-user-role-actor|[0]= newActor.name;
+        }
+
+        else if(newActor.|type|==ActorType.GROUP) {
+            payload.categorisedActors.|atlassian-group-role-actor|[0]= newActor.name;
+        }
+
+        else{
+            e.message="actor type is not specified correctly";
+            return false,e;
+        }
+
+        request.setJsonPayload(payload);
+        io:println(payload);
+
+        io:println("/project/" + projectIdOrKey+"/role/"+projectRoleId);
+        response, httpError = jiraEndpoint.put("/project/" + projectIdOrKey+"/role/"+projectRoleId, request);
+        jsonResponse, e = validateResponse(response, httpError);
+
+        if (e != null) {
+            return false, e;
+        }
+
+        else {
+            return true, null;
+        }
     }
 
 
@@ -181,17 +220,20 @@ public connector JiraConnector (Authentication authType) {
 //  Functions
 //*************************************************
 @Description {value:"Construct the request authoriaztion headers"}
-@Param {value:"request: The http request object"}
-function constructAuthHeader (Authentication authType,http:OutRequest request) {
 
-    if (authType==Authentication.BASIC){
+@Param {value:"authType: Authentication type preferred by the user"}
+@Param {value:"request: The http request object which is needed to be constructed"}
+function constructAuthHeader (AuthenticationType authType,http:OutRequest request) {
+
+    if (authType==AuthenticationType.BASIC){
         request.addHeader("Authorization", "Basic YXNoYW5Ad3NvMi5jb206YXNoYW4xMjM=");
     }
 }
 
 
 @Description {value:"Checks whether the http response contains any errors "}
-@Param {value:"request: The http request object"}
+@Param {value:"request: The http response object"}
+@Param{value:"httpError: http response error object"}
 function validateResponse(http:InResponse response, http:HttpConnectorError httpError)(json,error){
 
     error e = {message:"" ,cause:null};
@@ -199,23 +241,20 @@ function validateResponse(http:InResponse response, http:HttpConnectorError http
     if(httpError!=null){
         e.message = httpError.message;
         e.cause = httpError.cause;
-        io:println(e);
         return null,e;
     }
+
+    else if(response.statusCode != constants:STATUS_CODE_OK){
+        e.message = response.reasonPhrase;
+        e.message = "status "+<string>response.statusCode + ": " + e.message;
+        return null,e;
+    }
+
     else {
 
         json jsonResponse = response.getJsonPayload();
+        return jsonResponse,null;
 
-        if (response.statusCode != constants:STATUS_CODE_OK) {
-            e.message,_ = (string)jsonResponse.errorMessages[0];
-            e.message = "status "+<string>response.statusCode + ": " + e.message;
-            io:println(e);
-            return null,e;
-        }
-
-        else{
-            return jsonResponse,null;
-        }
     }
 
 }
@@ -311,10 +350,14 @@ public struct SetActor{
 }
 
 
-enum Authentication{
+
+public enum AuthenticationType{
     BASIC
 }
 
-enum ActorType{
+
+public enum ActorType{
     GROUP,USER
 }
+
+
