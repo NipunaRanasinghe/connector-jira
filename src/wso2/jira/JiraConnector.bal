@@ -25,8 +25,10 @@ import ballerina.collections;
 import src.wso2.jira.utils.constants;
 import ballerina.config;
 
+
+
 @Description {value: "Jira client connector"}
-public connector JiraConnector () {
+public connector JiraConnector (Authentication authType) {
 
     //creates HttpClient Endpoint
     endpoint<http:HttpClient> jiraEndpoint {
@@ -42,7 +44,7 @@ public connector JiraConnector () {
         error e = {message:"", cause:null};
         json jsonResponse;
         json[] jsonResponseArray;
-        constructAuthHeader(request);
+        constructAuthHeader(authType,request);
         response, httpError = jiraEndpoint.get("/project", request);
         jsonResponse, e = validateResponse(response, httpError);
 
@@ -62,14 +64,15 @@ public connector JiraConnector () {
 
     }
 
-
+    //@Description {value:"Get Jira Project information"}
+    //@Param {value: "string containing the unique key/id of the project"}
     action getProject (string projectIdOrKey) (ProjectSummary, error) {
         http:OutRequest request = {};
         http:InResponse response = {};
         ProjectSummary project;
         error e = {message:"", cause:null};
         json jsonResponse;
-        constructAuthHeader(request);
+        constructAuthHeader(authType,request);
 
         response, httpError = jiraEndpoint.get("/project/" + projectIdOrKey, request);
         jsonResponse, e = validateResponse(response, httpError);
@@ -85,18 +88,19 @@ public connector JiraConnector () {
 
     }
 
-
-    action getProjectRole (string projectIdOrKey, string roleId) (ProjectRole, error) {
+    //@Description {value: "Get the list of roles assigned to the project"}
+    //@Param {value: "string containing the unique key/id of project"}
+    //@Param {value: "string containing the unique id of the project role"}
+    action getProjectRole (string projectIdOrKey, string projectRoleId) (ProjectRole, error) {
         http:OutRequest request = {};
         http:InResponse response = {};
-        //ProjectRole role;
 
         error e = {message:"", cause:null};
         json jsonResponse;
-        json[] jsonResponseArray = [];
-        constructAuthHeader(request);
 
-        response, httpError = jiraEndpoint.get("/project/" + projectIdOrKey + "/role/" + roleId, request);
+        constructAuthHeader(authType,request);
+
+        response, httpError = jiraEndpoint.get("/project/" + projectIdOrKey + "/role/" + projectRoleId, request);
         jsonResponse, e = validateResponse(response, httpError);
 
         if (e != null) {
@@ -111,6 +115,8 @@ public connector JiraConnector () {
     }
 
 
+    //@Description {value:"Get all issue types with valid status values for a project"}
+    //@Param {value: "string containing of the unique key/id of project"}
     action getProjectStatuses (string projectIdOrKey) (ProjectStatus[], error) {
         http:OutRequest request = {};
         http:InResponse response = {};
@@ -119,7 +125,7 @@ public connector JiraConnector () {
         json[] jsonResponseArray;
         ProjectStatus[] statusArray = [];
 
-        constructAuthHeader(request);
+        constructAuthHeader(authType,request);
 
         response, httpError = jiraEndpoint.get("/project/" + projectIdOrKey+"/statuses", request);
         jsonResponse, e = validateResponse(response, httpError);
@@ -149,12 +155,20 @@ public connector JiraConnector () {
 
         }
 
-    //action getUserByName(string username)
+
+
+    action addActorToProject(string projectIdOrKey,string projectRoleId,SetActor newActor){
+
+    }
+
+
+    action getUserByName (string username){
+
+
+    }
+
 
 }
-
-
-
 
 
 
@@ -166,15 +180,17 @@ public connector JiraConnector () {
 //*************************************************
 //  Functions
 //*************************************************
-@Description {value:"Construct the request headers"}
+@Description {value:"Construct the request authoriaztion headers"}
 @Param {value:"request: The http request object"}
-function constructAuthHeader (http:OutRequest request) {
+function constructAuthHeader (Authentication authType,http:OutRequest request) {
 
-    request.addHeader("Authorization","Basic YXNoYW5Ad3NvMi5jb206YXNoYW4xMjM=");
+    if (authType==Authentication.BASIC){
+        request.addHeader("Authorization", "Basic YXNoYW5Ad3NvMi5jb206YXNoYW4xMjM=");
+    }
 }
 
 
-@Description {value:"Check whether the response contains any errors "}
+@Description {value:"Checks whether the http response contains any errors "}
 @Param {value:"request: The http request object"}
 function validateResponse(http:InResponse response, http:HttpConnectorError httpError)(json,error){
 
@@ -284,8 +300,21 @@ public struct User{
 }
 
 
-enum Authentication{
-    BASIC_AUTH
+
+
+
+
+public struct SetActor{
+    ActorType |type|;
+    string name;
+
 }
 
 
+enum Authentication{
+    BASIC
+}
+
+enum ActorType{
+    GROUP,USER
+}
