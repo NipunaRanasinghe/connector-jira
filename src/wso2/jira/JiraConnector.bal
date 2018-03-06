@@ -24,6 +24,7 @@ import ballerina.io;
 import ballerina.collections;
 import src.wso2.jira.utils.constants;
 import ballerina.config;
+import ballerina.runtime;
 
 
 
@@ -32,7 +33,7 @@ public connector JiraConnector (AuthenticationType authType) {
 
     //creates HttpClient Endpoint
     endpoint<http:HttpClient> jiraEndpoint {
-        create http:HttpClient("https://support-staging.wso2.com/jira/rest/api/2", {});
+        create http:HttpClient(constants:JIRA_API_ENDPOINT, {});
     }
     http:HttpConnectorError httpError;
 
@@ -162,33 +163,41 @@ public connector JiraConnector (AuthenticationType authType) {
         http:InResponse response = {};
         ProjectSummary project;
         error e = {message:"", cause:null};
-        json jsonPayload;
+        json jsonPayload = {};
         json jsonResponse;
 
         constructAuthHeader(authType,request);
 
-        json payload = models:addActorToProjectSchema;
 
-        payload.id,_ = <int>projectRoleId;
+       // json payload = models:addActorToProjectSchema;
 
-        if(newActor.|type|==ActorType.USER) {
-            payload.categorisedActors.|atlassian-user-role-actor|[0]= newActor.name;
-        }
+        //payload.id,_ = <int>projectRoleId;
 
-        else if(newActor.|type|==ActorType.GROUP) {
-            payload.categorisedActors.|atlassian-group-role-actor|[0]= newActor.name;
-        }
+        //if(newActor.|type|==ActorType.USER) {
+        //    payload.categorisedActors.|atlassian-user-role-actor|[0]= newActor.name;
+        //}
+        //
+        //else if(newActor.|type|==ActorType.GROUP) {
+        //    payload.categorisedActors.|atlassian-group-role-actor|[0]= newActor.name;
+        //}
+        //
+        //else{
+        //    e.message="actor type is not specified correctly";
+        //    return false,e;
+        //}
 
-        else{
-            e.message="actor type is not specified correctly";
-            return false,e;
-        }
 
-        request.setJsonPayload(payload);
-        io:println(payload);
+        jsonPayload = {"group":["support.client.AAALIFEDEV.user"]};
+        request.setJsonPayload(jsonPayload);
+        //request.setHeader("Authorization"," Basic YXNoYW5Ad3NvMi5jb206YXNoYW4xMjM");
+        //request.setHeader("Content-Type","application/json");
 
+        constructContentLengthHeader(request);
+
+        response, httpError = jiraEndpoint.post("/project/" + projectIdOrKey+"/role/"+projectRoleId, request);
+        //response, httpError = jiraEndpoint.post("/project/" + projectIdOrKey+"/role/"+projectRoleId, request);
         io:println("/project/" + projectIdOrKey+"/role/"+projectRoleId);
-        response, httpError = jiraEndpoint.put("/project/" + projectIdOrKey+"/role/"+projectRoleId, request);
+
         jsonResponse, e = validateResponse(response, httpError);
 
         if (e != null) {
@@ -196,8 +205,65 @@ public connector JiraConnector (AuthenticationType authType) {
         }
 
         else {
+            io:println(jsonResponse);
             return true, null;
         }
+    }
+
+
+    action getAllProjectCategories()(ProjectCategory[],error){
+        http:OutRequest request = {};
+        http:InResponse response = {};
+        ProjectCategory[] projectCategories = [];
+        error e = {message:"", cause:null};
+        json jsonResponse;
+        json[] jsonResponseArray;
+        constructAuthHeader(authType,request);
+        response, httpError = jiraEndpoint.get("/projectCategory", request);
+        jsonResponse, e = validateResponse(response, httpError);
+
+        if (e != null) {
+            return null, e;
+        }
+
+        else {
+            jsonResponseArray, e = (json[])jsonResponse;
+            int x = 0;
+            foreach (i in jsonResponseArray) {
+                projectCategories[x], e = <ProjectCategory>i;
+                x = x + 1;
+            }
+            return projectCategories, e;
+        }
+
+    }
+
+
+    action createNewProjectCategory(SetProjectCategory newCategory)(boolean,error){
+        http:OutRequest request = {};
+        http:InResponse response = {};
+        error e = null;
+        json jsonResponse;
+        json jsonPayload;
+
+        constructAuthHeader(authType,request);
+
+        jsonPayload,e = <json>newCategory;
+        if(e!=null){return false,e;}
+
+        request.setJsonPayload(jsonPayload);
+        constructContentLengthHeader(request);
+
+        response, httpError = jiraEndpoint.post("/projectCategory", request);
+        jsonResponse, e = validateResponse(response, httpError);
+        if (e != null) {
+            return false, e;
+        }
+
+        else {
+            return true,null;
+        }
+
     }
 
 
@@ -216,19 +282,37 @@ public connector JiraConnector (AuthenticationType authType) {
 
 
 
+
+
+
 //*************************************************
 //  Functions
 //*************************************************
-@Description {value:"Construct the request authoriaztion headers"}
-
+@Description {value:"Add authoriaztion header to the request"}
 @Param {value:"authType: Authentication type preferred by the user"}
 @Param {value:"request: The http request object which is needed to be constructed"}
 function constructAuthHeader (AuthenticationType authType,http:OutRequest request) {
 
     if (authType==AuthenticationType.BASIC){
-        request.addHeader("Authorization", "Basic YXNoYW5Ad3NvMi5jb206YXNoYW4xMjM=");
+
+        request.addHeader("Authorization", "Basic YXNoYW5Ad3NvMi5jb206YXNoYW4xMjM");
     }
 }
+
+
+function constructContentLengthHeader (http:OutRequest request) {
+   // request.addHeader("Transfer-Encoding","chunked");
+  //  request.addHeader("Content-Length", <string>request.getContentLength());
+    io:println(request.getContentLength());
+    io:println(request.getHeader("Content-Type"));
+    request.setHeader("Cache-Control","no-cache");
+    //request.setHeader("Transfer-Encoding","deflate");
+    //io:println(request.getHeader("Transfer-Encoding"));
+   // request.addHeader("Postman-Token","987f3bee-2885-c855-a529-90b1d8f07335");
+   //request.addHeader("Content-Length", "0");
+}
+
+
 
 
 @Description {value:"Checks whether the http response contains any errors "}
@@ -244,10 +328,26 @@ function validateResponse(http:InResponse response, http:HttpConnectorError http
         return null,e;
     }
 
-    else if(response.statusCode != constants:STATUS_CODE_OK){
+    else if(response.statusCode != constants:STATUS_CODE_OK && response.statusCode != constants:STATUS_CODE_CREATED && response.statusCode != constants:STATUS_CODE_NO_CONTENT){
+        error ee;
+        json res;
+        io:println(response);
         e.message = response.reasonPhrase;
         e.message = "status "+<string>response.statusCode + ": " + e.message;
+        try {
+            res = response.getJsonPayload();
+            var cause,ee = (string)res.errorMessages[0];
+            if(ee==null){e.message = e.message+ "- " + cause; }
+        }
+        catch(error err){
+            io:println(err.message);
+
+        }
+
         return null,e;
+
+
+
     }
 
     else {
@@ -347,6 +447,11 @@ public struct SetActor{
     ActorType |type|;
     string name;
 
+}
+
+public struct SetProjectCategory{
+    string name;
+    string description;
 }
 
 

@@ -42,11 +42,19 @@ public function main (string[] args) {
     //io:println(pointer[0]);
     //io:println(e);
 
-    jira:SetActor newActor = {name:"jira-developers",|type|:jira:ActorType.GROUP};
-
+    jira:SetActor newActor = {name:"support.client.AAALIFEDEV.user",|type|:jira:ActorType.GROUP};
     var pointer, e =  jiraConnector.addActorToProject("10314",constants:ROLE_ID_DEVELOPERS,newActor);
     io:println(pointer);
     io:println(e);
+
+
+    //jira:SetProjectCategory newCategory = {name:"new",description:"newCategory"};
+    //var pointer, e =  jiraConnector.createNewProjectCategory(newCategory);
+    //io:println(pointer);
+    //io:println(e);
+
+
+
 
 
 }

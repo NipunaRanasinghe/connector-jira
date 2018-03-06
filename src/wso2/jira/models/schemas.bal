@@ -6,3 +6,5 @@ import ballerina.io;
 public json addActorToProjectSchema = {id:"", categorisedActors: { |atlassian-user-role-actor|: [], |atlassian-group-role-actor|:[]} };
 
 
+public json createProjectCategorySchema = { name: "",
+                                              description: ""};
