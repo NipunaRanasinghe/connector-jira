@@ -33,7 +33,7 @@ public connector JiraConnector (AuthenticationType authType) {
 
     //creates HttpClient Endpoint
     endpoint<http:HttpClient> jiraEndpoint {
-        create http:HttpClient(constants:JIRA_API_ENDPOINT, {});
+        create http:HttpClient(constants:JIRA_API_ENDPOINT, getConnectorConfigs());
     }
     http:HttpConnectorError httpError;
 
@@ -362,7 +362,17 @@ function validateResponse(http:InResponse response, http:HttpConnectorError http
 
 
 
-
+function getConnectorConfigs() (http:Options) {
+    http:Options option = {
+                              ssl: {
+                                       trustStoreFile:"${ballerina.home}/bre/security/ballerinaTruststore.p12",
+                                       trustStorePassword:"ballerina"
+                                   },
+                              followRedirects: {},
+                              chunking:"never"
+                          };
+    return option;
+}
 
 
 
