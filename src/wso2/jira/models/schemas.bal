@@ -3,7 +3,7 @@ package src.wso2.jira.models;
 import ballerina.io;
 
 
-public json addActorToProjectSchema = {id:"", categorisedActors: { |atlassian-user-role-actor|: [], |atlassian-group-role-actor|:[]} };
+public json addActorToProjectSchema = {"user":[],"group":[]};
 
 
 public json createProjectCategorySchema = { name: "",

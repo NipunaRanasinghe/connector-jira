@@ -89,6 +89,35 @@ public connector JiraConnector (AuthenticationType authType) {
 
     }
 
+
+    action createNewProject(NewProject newProject) (boolean, error) {
+        http:OutRequest request = {};
+        http:InResponse response = {};
+        ProjectSummary project;
+        error e = null;
+        json jsonResponse;
+        json jsonPayload;
+        constructAuthHeader(authType,request);
+
+        jsonPayload,e = <json>newProject;
+
+        request.setJsonPayload(jsonPayload);
+        io:println(request.getJsonPayload());
+
+        response, httpError = jiraEndpoint.post("/project",request);
+        jsonResponse, e = validateResponse(response, httpError);
+
+        if (e != null) {
+            return false, e;
+        }
+
+        else {
+            return true, e;
+        }
+
+    }
+
+
     //@Description {value: "Get the list of roles assigned to the project"}
     //@Param {value: "string containing the unique key/id of project"}
     //@Param {value: "string containing the unique id of the project role"}
@@ -114,7 +143,6 @@ public connector JiraConnector (AuthenticationType authType) {
         }
 
     }
-
 
     //@Description {value:"Get all issue types with valid status values for a project"}
     //@Param {value: "string containing of the unique key/id of project"}
@@ -169,35 +197,25 @@ public connector JiraConnector (AuthenticationType authType) {
         constructAuthHeader(authType,request);
 
 
-       // json payload = models:addActorToProjectSchema;
-
-        //payload.id,_ = <int>projectRoleId;
-
-        //if(newActor.|type|==ActorType.USER) {
-        //    payload.categorisedActors.|atlassian-user-role-actor|[0]= newActor.name;
-        //}
-        //
-        //else if(newActor.|type|==ActorType.GROUP) {
-        //    payload.categorisedActors.|atlassian-group-role-actor|[0]= newActor.name;
-        //}
-        //
-        //else{
-        //    e.message="actor type is not specified correctly";
-        //    return false,e;
-        //}
+        json payload = models:addActorToProjectSchema;
 
 
-        jsonPayload = {"group":["support.client.AAALIFEDEV.user"]};
-        request.setJsonPayload(jsonPayload);
-        //request.setHeader("Authorization"," Basic YXNoYW5Ad3NvMi5jb206YXNoYW4xMjM");
-        //request.setHeader("Content-Type","application/json");
 
-        constructContentLengthHeader(request);
+        if(newActor.|type|==ActorType.USER) {
+            payload["user"][0]= newActor.name;
+        }
+
+        else if(newActor.|type|==ActorType.GROUP) {
+            payload["group"][0]= newActor.name;
+        }
+
+        else{
+            e.message="actor type is not specified correctly";
+            return false,e;
+        }
+
 
         response, httpError = jiraEndpoint.post("/project/" + projectIdOrKey+"/role/"+projectRoleId, request);
-        //response, httpError = jiraEndpoint.post("/project/" + projectIdOrKey+"/role/"+projectRoleId, request);
-        io:println("/project/" + projectIdOrKey+"/role/"+projectRoleId);
-
         jsonResponse, e = validateResponse(response, httpError);
 
         if (e != null) {
@@ -239,7 +257,7 @@ public connector JiraConnector (AuthenticationType authType) {
     }
 
 
-    action createNewProjectCategory(SetProjectCategory newCategory)(boolean,error){
+    action createNewProjectCategory(NewProjectCategory newCategory)(boolean,error){
         http:OutRequest request = {};
         http:InResponse response = {};
         error e = null;
@@ -252,7 +270,7 @@ public connector JiraConnector (AuthenticationType authType) {
         if(e!=null){return false,e;}
 
         request.setJsonPayload(jsonPayload);
-        constructContentLengthHeader(request);
+
 
         response, httpError = jiraEndpoint.post("/projectCategory", request);
         jsonResponse, e = validateResponse(response, httpError);
@@ -264,6 +282,25 @@ public connector JiraConnector (AuthenticationType authType) {
             return true,null;
         }
 
+    }
+
+
+    action deleteProjectCategory(string projectCategoryId)(boolean,error){
+        http:OutRequest request = {};
+        http:InResponse response = {};
+        error e = null;
+        json jsonResponse;
+
+        constructAuthHeader(authType,request);
+
+        response, httpError = jiraEndpoint.delete("/projectCategory/"+projectCategoryId, request);
+        jsonResponse, e = validateResponse(response, httpError);
+        if (e != null) {
+            return false, e;
+        }
+        else {
+            return true,null;
+        }
     }
 
 
@@ -298,21 +335,6 @@ function constructAuthHeader (AuthenticationType authType,http:OutRequest reques
         request.addHeader("Authorization", "Basic YXNoYW5Ad3NvMi5jb206YXNoYW4xMjM");
     }
 }
-
-
-function constructContentLengthHeader (http:OutRequest request) {
-   // request.addHeader("Transfer-Encoding","chunked");
-  //  request.addHeader("Content-Length", <string>request.getContentLength());
-    io:println(request.getContentLength());
-    io:println(request.getHeader("Content-Type"));
-    request.setHeader("Cache-Control","no-cache");
-    //request.setHeader("Transfer-Encoding","deflate");
-    //io:println(request.getHeader("Transfer-Encoding"));
-   // request.addHeader("Postman-Token","987f3bee-2885-c855-a529-90b1d8f07335");
-   //request.addHeader("Content-Length", "0");
-}
-
-
 
 
 @Description {value:"Checks whether the http response contains any errors "}
@@ -351,14 +373,21 @@ function validateResponse(http:InResponse response, http:HttpConnectorError http
     }
 
     else {
+        try{
+            json jsonResponse = response.getJsonPayload();
+            return jsonResponse,null;
+        }
 
-        json jsonResponse = response.getJsonPayload();
-        return jsonResponse,null;
+        catch(error err){
+            io:println(err.message);
+        }
+
+        return null,null;
+
 
     }
 
 }
-
 
 
 
@@ -377,102 +406,5 @@ function getConnectorConfigs() (http:Options) {
 
 
 
-//*************************************************
-//  Struct Templates
-//*************************************************
-// #TODO Move these structs to another package once https://github.com/ballerina-lang/ballerina/issues/4736 is fixed.
-
-
-struct BasicAuth {
-    string username;
-    string password;
-}
-
-
-struct BasicAuthBase64 {
-    string token;
-}
-
-
-public struct ProjectSummary {
-    string self;
-    string id;
-    string key;
-    string name;
-    ProjectCategory projectCategory;
-    string projectTypeKey;
-}
-
-
-public struct ProjectCategory {
-    string self;
-    string id;
-    string name;
-    string description;
-}
-
-
-
-public struct ProjectRole {
-    string self;
-    string name;
-    string description;
-    Actor[] actors;
-}
-
-public struct Actor {
-    string id;
-    string name;
-    string displayName;
-    string |type|;
-}
-
-
-public struct ProjectStatus{
-    string self;
-    string name;
-    string id;
-    json statuses;
-}
-
-
-public struct User{
-    string self;
-    string key;
-    string name;
-    string displayName;
-    string emailAddress;
-    json avatarUrls;
-    boolean active;
-    string timeZone;
-    string locale;
-}
-
-
-
-
-
-
-public struct SetActor{
-    ActorType |type|;
-    string name;
-
-}
-
-public struct SetProjectCategory{
-    string name;
-    string description;
-}
-
-
-
-public enum AuthenticationType{
-    BASIC
-}
-
-
-public enum ActorType{
-    GROUP,USER
-}
 
 

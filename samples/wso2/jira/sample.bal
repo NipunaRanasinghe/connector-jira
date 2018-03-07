@@ -42,19 +42,39 @@ public function main (string[] args) {
     //io:println(pointer[0]);
     //io:println(e);
 
-    jira:SetActor newActor = {name:"support.client.AAALIFEDEV.user",|type|:jira:ActorType.GROUP};
-    var pointer, e =  jiraConnector.addActorToProject("10314",constants:ROLE_ID_DEVELOPERS,newActor);
-    io:println(pointer);
-    io:println(e);
+    //jira:SetActor newActor = {name:"support.client.AAALIFEDEV.user",|type|:jira:ActorType.GROUP};
+    //var pointer, e =  jiraConnector.addActorToProject("10314",constants:ROLE_ID_DEVELOPERS,newActor);
+    //io:println(pointer);
+    //io:println(e);
 
 
     //jira:SetProjectCategory newCategory = {name:"new",description:"newCategory"};
     //var pointer, e =  jiraConnector.createNewProjectCategory(newCategory);
     //io:println(pointer);
     //io:println(e);
+    //
+    //
+    //var pointer, e =  jiraConnector.deleteProjectCategory("10571");
+    //io:println(pointer);
+    //io:println(e);
 
 
+    jira:NewProject newProject = {key:"NIPUNATESTAAA",name: "Connector Check3 - Production Support",
+    projectTypeKey:"software",
+    projectTemplateKey:"com.pyxis.greenhopper.jira:basic-software-development-template",
+    description: "Example Project description",
+    lead: "pasan@wso2.com",
+    url: "http://atlassian.com",
+    assigneeType: "PROJECT_LEAD",
+    avatarId: 10005,
+    issueSecurityScheme: 10000,
+    permissionScheme: 10075,
+    notificationScheme: 10086,
+    categoryId: 10000};
 
+    var pointer, e =  jiraConnector.createNewProject(newProject);
+    io:println(pointer);
+    io:println(e);
 
 
 }
