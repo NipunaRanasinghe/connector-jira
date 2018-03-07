@@ -19,7 +19,7 @@ public function main (string[] args) {
         create jira:JiraConnector(jira:AuthenticationType.BASIC);
     }
    // models:ProjectPointer[] pointer;
-    error  e;
+    jira:ConnectorError e;
 
 
     //var role,e = jiraConnector.getProjectRole("10314",constants:ROLE_ID_DEVELOPERS);
@@ -76,6 +76,9 @@ public function main (string[] args) {
     io:println(pointer);
     io:println(e);
 
+
+
+    io:println(typeof(e.cause));
 
 }
 

@@ -1,5 +1,6 @@
 package src.wso2.jira;
-
+import  ballerina.io;
+import ballerina.builtin;
 
 struct BasicAuth {
     string username;
@@ -112,4 +113,13 @@ public struct NewProject {
     int permissionScheme;
     int notificationScheme;
     int categoryId;
+}
+
+
+
+public struct ConnectorError{
+    string |type|;
+    string message;
+    json jiraServerErrorLog;
+    error cause;
 }
