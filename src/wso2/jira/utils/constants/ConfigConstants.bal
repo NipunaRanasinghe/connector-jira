@@ -18,8 +18,9 @@
 package src.wso2.jira.utils.constants;
 
 
+
 const string JIRA_API_URL = "https://support-staging.wso2.com/jira/rest/api/";
 const string JIRA_API_VERSION = "2";
 
 
-public const string JIRA_API_ENDPOINT = JIRA_API_URL + JIRA_API_VERSION ;
+public const string JIRA_API_ENDPOINT = JIRA_API_URL + JIRA_API_VERSION;

@@ -21,10 +21,10 @@ package src.wso2.jira;
 import ballerina.net.http;
 import src.wso2.jira.models;
 import ballerina.io;
-import ballerina.collections;
+//import ballerina.collections;
 import src.wso2.jira.utils.constants;
-import ballerina.config;
-import ballerina.runtime;
+//import ballerina.config;
+//import ballerina.runtime;
 
 
 
@@ -33,16 +33,16 @@ public connector JiraConnector (AuthenticationType authType) {
 
     //creates HttpClient Endpoint
     endpoint<http:HttpClient> jiraEndpoint {
-        create http:HttpClient(constants:JIRA_API_ENDPOINT, getConnectorConfigs());
+        create http:HttpClient(constants:JIRA_API_ENDPOINT, getHttpConfigs());
     }
     http:HttpConnectorError httpError;
 
 
-    action getAllProjects () (ProjectSummary[], ConnectorError ) {
+    action getAllProjectSummeries () (ProjectSummary[], JiraConnectorError ) {
         http:OutRequest request = {};
         http:InResponse response = {};
         ProjectSummary[] projects = [];
-        ConnectorError e;
+        JiraConnectorError e;
         error err;
         json jsonResponse;
         json[] jsonResponseArray;
@@ -57,14 +57,15 @@ public connector JiraConnector (AuthenticationType authType) {
         else {
             jsonResponseArray, err = (json[])jsonResponse;
             if(err!=null){
-                e = <ConnectorError,toConnectorError()>err;
+                e = <JiraConnectorError,toConnectorError()>err;
                 return null,e;
             }
             int x = 0;
             foreach (i in jsonResponseArray) {
+                i["leadName"] = i["lead"]["name"];
                 projects[x], err = <ProjectSummary>i;
                 if(err!=null){
-                    e = <ConnectorError,toConnectorError()>err;
+                    e = <JiraConnectorError,toConnectorError()>err;
                     return null,e;
                 }
                 x = x + 1;
@@ -76,11 +77,11 @@ public connector JiraConnector (AuthenticationType authType) {
 
     //@Description {value:"Get Jira Project information"}
     //@Param {value: "string containing the unique key/id of the project"}
-    action getProjectSummary (string projectIdOrKey) (ProjectSummary, ConnectorError) {
+    action getProjectSummary (string projectIdOrKey) (ProjectSummary, JiraConnectorError) {
         http:OutRequest request = {};
         http:InResponse response = {};
         ProjectSummary project;
-        ConnectorError e;
+        JiraConnectorError e;
         error err;
 
         json jsonResponse;
@@ -94,19 +95,20 @@ public connector JiraConnector (AuthenticationType authType) {
         }
 
         else {
+            jsonResponse["leadName"] = jsonResponse["lead"]["name"];
             project, err = <ProjectSummary>jsonResponse;
-            e = <ConnectorError,toConnectorError()>err;
+            e = <JiraConnectorError,toConnectorError()>err;
             return project,e;
         }
 
     }
 
 
-    action createNewProject(NewProject newProject) (boolean, ConnectorError) {
+    action createNewProject(NewProject newProject) (boolean, JiraConnectorError) {
         http:OutRequest request = {};
         http:InResponse response = {};
         ProjectSummary project;
-        ConnectorError e;
+        JiraConnectorError e;
         error err;
         json jsonResponse;
         json jsonPayload;
@@ -114,7 +116,7 @@ public connector JiraConnector (AuthenticationType authType) {
 
         jsonPayload,err= <json>newProject;
         if(err!=null){
-            e = <ConnectorError,toConnectorError()>err;
+            e = <JiraConnectorError,toConnectorError()>err;
             return false,e;
         }
 
@@ -134,104 +136,106 @@ public connector JiraConnector (AuthenticationType authType) {
 
     }
 
-
+    //This Action is replaced by a struct-binded function
     //@Description {value: "Get the list of roles assigned to the project"}
     //@Param {value: "string containing the unique key/id of project"}
     //@Param {value: "string containing the unique id of the project role"}
-    action getProjectRole (string projectIdOrKey, string projectRoleId) (ProjectRole, ConnectorError) {
-        http:OutRequest request = {};
-        http:InResponse response = {};
-        ConnectorError e;
-        json jsonResponse;
+    //action getProjectRole (string projectIdOrKey, string projectRoleId) (ProjectRole, JiraConnectorError) {
+    //    http:OutRequest request = {};
+    //    http:InResponse response = {};
+    //    JiraConnectorError e;
+    //    json jsonResponse;
+    //
+    //    constructAuthHeader(authType,request);
+    //
+    //    response, httpError = jiraEndpoint.get("/project/" + projectIdOrKey + "/role/" + projectRoleId, request);
+    //    jsonResponse, e = validateResponse(response, httpError);
+    //
+    //    if (e != null) {
+    //        return null, e;
+    //    }
+    //
+    //    else {
+    //        var role, err = <ProjectRole>jsonResponse;
+    //        if(err!=null){
+    //            e = <JiraConnectorError,toConnectorError()>err;
+    //            return null,e;
+    //        }
+    //        return role, e;
+    //    }
+    //
+    //}
 
-        constructAuthHeader(authType,request);
 
-        response, httpError = jiraEndpoint.get("/project/" + projectIdOrKey + "/role/" + projectRoleId, request);
-        jsonResponse, e = validateResponse(response, httpError);
-
-        if (e != null) {
-            return null, e;
-        }
-
-        else {
-            var role, err = <ProjectRole>jsonResponse;
-            if(err!=null){
-                e = <ConnectorError,toConnectorError()>err;
-                return null,e;
-            }
-            return role, e;
-        }
-
-    }
-
+    //This Action is replaced by a struct-binded function
     //@Description {value:"Get all issue types with valid status values for a project"}
     //@Param {value: "string containing of the unique key/id of project"}
-    action getProjectStatuses (string projectIdOrKey) (ProjectStatus[], ConnectorError) {
-        http:OutRequest request = {};
-        http:InResponse response = {};
-        ConnectorError e;
-        error err;
-        json jsonResponse;
-        json[] jsonResponseArray;
-        ProjectStatus[] statusArray = [];
-
-        constructAuthHeader(authType,request);
-
-        response, httpError = jiraEndpoint.get("/project/" + projectIdOrKey+"/statuses", request);
-        jsonResponse, e = validateResponse(response, httpError);
-
-        if (e != null) {
-            return null, e;
-        }
-
-        else {
-            jsonResponseArray,err = (json[])jsonResponse;
-            if(err!=null){
-                e = <ConnectorError,toConnectorError()>err;
-                return null,e;
-            }
-            else {
-                int x = 0;
-                foreach (i in jsonResponseArray) {
-                    statusArray[x],err = <ProjectStatus>jsonResponseArray[x];
-                    if(err!=null){
-                        e = <ConnectorError,toConnectorError()>err;
-                        return null,e;
-                    }
-                    x=x+1;
-                }
-
-                return statusArray,null;
-            }
-        }
-
-
-
-        }
+    //action getProjectStatuses (string projectIdOrKey) (ProjectStatus[], JiraConnectorError) {
+    //    http:OutRequest request = {};
+    //    http:InResponse response = {};
+    //    JiraConnectorError e;
+    //    error err;
+    //    json jsonResponse;
+    //    json[] jsonResponseArray;
+    //    ProjectStatus[] statusArray = [];
+    //
+    //    constructAuthHeader(authType,request);
+    //
+    //    response, httpError = jiraEndpoint.get("/project/" + projectIdOrKey+"/statuses", request);
+    //    jsonResponse, e = validateResponse(response, httpError);
+    //
+    //    if (e != null) {
+    //        return null, e;
+    //    }
+    //
+    //    else {
+    //        jsonResponseArray,err = (json[])jsonResponse;
+    //        if(err!=null){
+    //            e = <JiraConnectorError,toConnectorError()>err;
+    //            return null,e;
+    //        }
+    //        else {
+    //            int x = 0;
+    //            foreach (i in jsonResponseArray) {
+    //                statusArray[x],err = <ProjectStatus>jsonResponseArray[x];
+    //                if(err!=null){
+    //                    e = <JiraConnectorError,toConnectorError()>err;
+    //                    return null,e;
+    //                }
+    //                x=x+1;
+    //            }
+    //
+    //            return statusArray,null;
+    //        }
+    //    }
+    //
+    //
+    //
+    //    }
 
 
     @Description {value:"Updates a project role to include the specified actors (users or groups)"}
-    action addActorToProject(string projectIdOrKey,string projectRoleId,SetActor newActor)(boolean, ConnectorError){
+    action addActorToProject(string projectIdOrKey,string projectRoleId,SetActor newActor)(boolean, JiraConnectorError){
         http:OutRequest request = {};
         http:InResponse response = {};
         ProjectSummary project;
-        ConnectorError e = {message:""};
-        json jsonPayload = {};
+        JiraConnectorError e = {message:""};
+        json jsonPayload;
         json jsonResponse;
 
         constructAuthHeader(authType,request);
 
 
-        json payload = models:addActorToProjectSchema;
+        jsonPayload = models:addActorToRoleSchema;
 
 
 
         if(newActor.|type|==ActorType.USER) {
-            payload["user"][0]= newActor.name;
+            jsonPayload["user"][0]= newActor.name;
         }
 
         else if(newActor.|type|==ActorType.GROUP) {
-            payload["group"][0]= newActor.name;
+            jsonPayload["group"][0]= newActor.name;
         }
 
         else{
@@ -239,7 +243,7 @@ public connector JiraConnector (AuthenticationType authType) {
             return false,e;
         }
 
-
+        request.setJsonPayload(jsonPayload);
         response, httpError = jiraEndpoint.post("/project/" + projectIdOrKey+"/role/"+projectRoleId, request);
         jsonResponse, e = validateResponse(response, httpError);
 
@@ -254,11 +258,11 @@ public connector JiraConnector (AuthenticationType authType) {
     }
 
 
-    action getAllProjectCategories()(ProjectCategory[],ConnectorError ){
+    action getAllProjectCategories()(ProjectCategory[],JiraConnectorError ){
         http:OutRequest request = {};
         http:InResponse response = {};
         ProjectCategory[] projectCategories = [];
-        ConnectorError e;
+        JiraConnectorError e;
         error err;
         json jsonResponse;
         json[] jsonResponseArray;
@@ -276,7 +280,7 @@ public connector JiraConnector (AuthenticationType authType) {
             foreach (i in jsonResponseArray) {
                 projectCategories[x], err = <ProjectCategory>i;
                 if(err!=null){
-                    e = <ConnectorError,toConnectorError()>err;
+                    e = <JiraConnectorError,toConnectorError()>err;
                     return null,e;
                 }
                 x = x + 1;
@@ -287,10 +291,10 @@ public connector JiraConnector (AuthenticationType authType) {
     }
 
 
-    action createNewProjectCategory(NewProjectCategory newCategory)(boolean,ConnectorError ){
+    action createNewProjectCategory(NewProjectCategory newCategory)(boolean,JiraConnectorError ){
         http:OutRequest request = {};
         http:InResponse response = {};
-        ConnectorError e = null;
+        JiraConnectorError e = null;
         error err;
         json jsonResponse;
         json jsonPayload;
@@ -299,7 +303,7 @@ public connector JiraConnector (AuthenticationType authType) {
 
         jsonPayload,err = <json>newCategory;
         if(err!=null){
-            e = <ConnectorError,toConnectorError()>err;
+            e = <JiraConnectorError,toConnectorError()>err;
             return false,e;
         }
 
@@ -319,10 +323,10 @@ public connector JiraConnector (AuthenticationType authType) {
     }
 
 
-    action deleteProjectCategory(string projectCategoryId)(boolean,ConnectorError ){
+    action deleteProjectCategory(string projectCategoryId)(boolean,JiraConnectorError ){
         http:OutRequest request = {};
         http:InResponse response = {};
-        ConnectorError e = null;
+        JiraConnectorError e = null;
         json jsonResponse;
 
         constructAuthHeader(authType,request);
@@ -338,10 +342,7 @@ public connector JiraConnector (AuthenticationType authType) {
     }
 
 
-    action getUserByName (string username){
 
-
-    }
 
 
 }
@@ -374,9 +375,9 @@ function constructAuthHeader (AuthenticationType authType,http:OutRequest reques
 @Description {value:"Checks whether the http response contains any errors "}
 @Param {value:"request: The http response object"}
 @Param{value:"httpError: http response error object"}
-function validateResponse(http:InResponse response, http:HttpConnectorError httpError)(json,ConnectorError){
+function validateResponse(http:InResponse response, http:HttpConnectorError httpError)(json,JiraConnectorError){
 
-    ConnectorError e = {|type|:null, message:"" ,cause:null};
+    JiraConnectorError e = {|type|:null, message:"" ,cause:null};
 
     if(httpError!=null){
         e.|type| = "HTTP Error";
@@ -386,7 +387,6 @@ function validateResponse(http:InResponse response, http:HttpConnectorError http
     }
 
     else if(response.statusCode != constants:STATUS_CODE_OK && response.statusCode != constants:STATUS_CODE_CREATED && response.statusCode != constants:STATUS_CODE_NO_CONTENT){
-        error ee;
         json res;
         io:println(response);
         e.|type|="Server Error";
@@ -426,7 +426,7 @@ function validateResponse(http:InResponse response, http:HttpConnectorError http
 
 
 
-function getConnectorConfigs() (http:Options) {
+function getHttpConfigs() (http:Options) {
     http:Options option = {
                               ssl: {
                                        trustStoreFile:"${ballerina.home}/bre/security/ballerinaTruststore.p12",
@@ -441,9 +441,8 @@ function getConnectorConfigs() (http:Options) {
 
 
 
-transformer<error source,ConnectorError target>toConnectorError(){
-    target.message = source.message;
-    target.cause = source.cause;
+transformer<error source,JiraConnectorError target>toConnectorError() {
+    target = source!=null?{message:source.message,cause:source.cause}:null;
 }
 
 

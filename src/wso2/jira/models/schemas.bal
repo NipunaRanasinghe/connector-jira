@@ -1,9 +1,9 @@
 package src.wso2.jira.models;
 
-import ballerina.io;
+//import ballerina.io;
 
 
-public json addActorToProjectSchema = {"user":[],"group":[]};
+public json addActorToRoleSchema = {"user":[],"group":[]};
 
 
 public json createProjectCategorySchema = { name: "",
