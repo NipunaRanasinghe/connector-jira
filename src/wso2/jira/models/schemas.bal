@@ -5,6 +5,5 @@ package src.wso2.jira.models;
 
 public json addActorToRoleSchema = {"user":[],"group":[]};
 
-
 public json createProjectCategorySchema = { name: "",
                                               description: ""};

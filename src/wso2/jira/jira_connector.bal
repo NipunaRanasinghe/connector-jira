@@ -19,7 +19,7 @@
 package src.wso2.jira;
 
 import ballerina.net.http;
-import src.wso2.jira.models;
+//import src.wso2.jira.models;
 import ballerina.io;
 //import ballerina.collections;
 import src.wso2.jira.utils.constants;
@@ -38,7 +38,7 @@ public connector JiraConnector (AuthenticationType authType) {
     http:HttpConnectorError httpError;
 
 
-    action getAllProjectSummeries () (ProjectSummary[], JiraConnectorError ) {
+    action getAllProjectSummaries () (ProjectSummary[], JiraConnectorError ) {
         http:OutRequest request = {};
         http:InResponse response = {};
         ProjectSummary[] projects = [];
@@ -63,6 +63,8 @@ public connector JiraConnector (AuthenticationType authType) {
             int x = 0;
             foreach (i in jsonResponseArray) {
                 i["leadName"] = i["lead"]["name"];
+                i["email"] = "";
+                i["issueTypes"] = [];
                 projects[x], err = <ProjectSummary>i;
                 if(err!=null){
                     e = <JiraConnectorError,toConnectorError()>err;
@@ -107,7 +109,6 @@ public connector JiraConnector (AuthenticationType authType) {
     action createNewProject(NewProject newProject) (boolean, JiraConnectorError) {
         http:OutRequest request = {};
         http:InResponse response = {};
-        ProjectSummary project;
         JiraConnectorError e;
         error err;
         json jsonResponse;
@@ -136,7 +137,7 @@ public connector JiraConnector (AuthenticationType authType) {
 
     }
 
-    //This Action is replaced by a struct-binded function
+    //This Action is replaced by a struct-bound function
     //@Description {value: "Get the list of roles assigned to the project"}
     //@Param {value: "string containing the unique key/id of project"}
     //@Param {value: "string containing the unique id of the project role"}
@@ -167,7 +168,7 @@ public connector JiraConnector (AuthenticationType authType) {
     //}
 
 
-    //This Action is replaced by a struct-binded function
+    //This Action is replaced by a struct-bound function
     //@Description {value:"Get all issue types with valid status values for a project"}
     //@Param {value: "string containing of the unique key/id of project"}
     //action getProjectStatuses (string projectIdOrKey) (ProjectStatus[], JiraConnectorError) {
@@ -213,49 +214,49 @@ public connector JiraConnector (AuthenticationType authType) {
     //
     //    }
 
-
-    @Description {value:"Updates a project role to include the specified actors (users or groups)"}
-    action addActorToProject(string projectIdOrKey,string projectRoleId,SetActor newActor)(boolean, JiraConnectorError){
-        http:OutRequest request = {};
-        http:InResponse response = {};
-        ProjectSummary project;
-        JiraConnectorError e = {message:""};
-        json jsonPayload;
-        json jsonResponse;
-
-        constructAuthHeader(authType,request);
-
-
-        jsonPayload = models:addActorToRoleSchema;
-
-
-
-        if(newActor.|type|==ActorType.USER) {
-            jsonPayload["user"][0]= newActor.name;
-        }
-
-        else if(newActor.|type|==ActorType.GROUP) {
-            jsonPayload["group"][0]= newActor.name;
-        }
-
-        else{
-            e.message="actor type is not specified correctly";
-            return false,e;
-        }
-
-        request.setJsonPayload(jsonPayload);
-        response, httpError = jiraEndpoint.post("/project/" + projectIdOrKey+"/role/"+projectRoleId, request);
-        jsonResponse, e = validateResponse(response, httpError);
-
-        if (e != null) {
-            return false, e;
-        }
-
-        else {
-            io:println(jsonResponse);
-            return true, null;
-        }
-    }
+    //This Action is replaced by a struct-bound function
+    //@Description {value:"Updates a project role to include the specified actors (users or groups)"}
+    //action addActorToProject(string projectIdOrKey,string projectRoleId,SetActor newActor)(boolean, JiraConnectorError){
+    //    http:OutRequest request = {};
+    //    http:InResponse response = {};
+    //    ProjectSummary project;
+    //    JiraConnectorError e = {message:""};
+    //    json jsonPayload;
+    //    json jsonResponse;
+    //
+    //    constructAuthHeader(authType,request);
+    //
+    //
+    //    jsonPayload = models:addActorToRoleSchema;
+    //
+    //
+    //
+    //    if(newActor.|type|==ActorType.USER) {
+    //        jsonPayload["user"][0]= newActor.name;
+    //    }
+    //
+    //    else if(newActor.|type|==ActorType.GROUP) {
+    //        jsonPayload["group"][0]= newActor.name;
+    //    }
+    //
+    //    else{
+    //        e.message="actor type is not specified correctly";
+    //        return false,e;
+    //    }
+    //
+    //    request.setJsonPayload(jsonPayload);
+    //    response, httpError = jiraEndpoint.post("/project/" + projectIdOrKey+"/role/"+projectRoleId, request);
+    //    jsonResponse, e = validateResponse(response, httpError);
+    //
+    //    if (e != null) {
+    //        return false, e;
+    //    }
+    //
+    //    else {
+    //        io:println(jsonResponse);
+    //        return true, null;
+    //    }
+    //}
 
 
     action getAllProjectCategories()(ProjectCategory[],JiraConnectorError ){
@@ -398,25 +399,20 @@ function validateResponse(http:InResponse response, http:HttpConnectorError http
         }
         catch(error err){
             io:println(err.message);
-
         }
-
         return null,e;
-
-
 
     }
 
     else {
         try{
             json jsonResponse = response.getJsonPayload();
+            io:println(jsonResponse);
             return jsonResponse,null;
         }
-
         catch(error err){
             io:println(err.message);
         }
-
         return null,null;
 
 
@@ -437,7 +433,6 @@ function getHttpConfigs() (http:Options) {
                           };
     return option;
 }
-
 
 
 

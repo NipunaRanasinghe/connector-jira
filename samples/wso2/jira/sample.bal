@@ -27,18 +27,23 @@ public function main (string[] args) {
     //io:println(e);
 
 
-    var project, e =  jiraConnector.getProjectSummary("10314");
-    io:println(project);
-    io:println(e);
+    //var project, e =  jiraConnector.getProjectSummary("10314");
+    //io:println(project);
+    //io:println(e);
 
     //var pointer2, e =  project.getRole(jira:ProjectRoleType.EXTERNAL_CONSULTANT);
     //io:println(pointer2);
     //io:println(e);
 
 
-    var pointer2, e =  project.getStatuses();
-    io:println(pointer2);
-    io:println(e);
+    //var pointer2, e =  project.getStatuses();
+    //io:println(pointer2);
+    //io:println(e);
+
+
+    //var pointer2, e =  project.updateProjectType("");
+    //io:println(pointer2);
+    //io:println(e);
 
     //jira:SetActor newActor = {name:"support.client.AAALIFEDEV.user",|type|:jira:ActorType.GROUP};
     //var pointer2, e =  pointer.addActorToRole(jira:ProjectRoleType.EXTERNAL_CONSULTANT,newActor);
@@ -77,8 +82,8 @@ public function main (string[] args) {
     //io:println(pointer);
     //io:println(e);
 
-    //
-    //jira:NewProject newProject = {key:"NIPUNATESTAAA",name: "Connector Check3 - Production Support",
+
+    //jira:NewProject newProject = {key:"NIPUNATESTB",name: "Connector Check4 - Production Support",
     //projectTypeKey:"software",
     //projectTemplateKey:"com.pyxis.greenhopper.jira:basic-software-development-template",
     //description: "Example Project description",
@@ -94,6 +99,20 @@ public function main (string[] args) {
     //var pointer, e =  jiraConnector.createNewProject(newProject);
     //io:println(pointer);
     //io:println(e);
+
+    var project, e =  jiraConnector.getProjectSummary("10314");
+    io:println(project);
+    io:println(e);
+
+
+
+    //var pointer2, e =  project.updateProjectType(jira:ProjectType.SOFTWARE);
+    //io:println(pointer2);
+    //io:println(e);
+
+    var pointer2, e =  project.components[0].fetchComponent();
+    io:println(pointer2);
+    io:println(e);
 
 
 
