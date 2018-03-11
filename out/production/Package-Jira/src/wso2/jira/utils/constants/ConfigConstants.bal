@@ -1,3 +1,4 @@
+//
 // Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
@@ -14,5 +15,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
+package src.wso2.jira.utils.constants;
 
-package src.wso2.jira.connectors;
+
+
+const string JIRA_API_URL = "https://support-staging.wso2.com/jira/rest/api/";
+const string JIRA_API_VERSION = "2";
+
+
+public const string JIRA_API_ENDPOINT = JIRA_API_URL + JIRA_API_VERSION;

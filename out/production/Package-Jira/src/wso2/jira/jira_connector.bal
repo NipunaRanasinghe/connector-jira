@@ -27,7 +27,7 @@ import src.wso2.jira.utils.constants;
 //import ballerina.runtime;
 
 
-@Description {value:"Jira client connector"}
+@Description {value: "Jira client connector"}
 public connector JiraConnector (AuthenticationType authType) {
 
     //creates HttpClient Endpoint
@@ -37,7 +37,7 @@ public connector JiraConnector (AuthenticationType authType) {
     http:HttpConnectorError httpError;
 
 
-    action getAllProjectSummaries () (Project[], JiraConnectorError) {
+    action getAllProjectSummaries() (Project[], JiraConnectorError ) {
         http:OutRequest request = {};
         http:InResponse response = {};
         Project[] projects = [];
@@ -45,34 +45,29 @@ public connector JiraConnector (AuthenticationType authType) {
         error err;
         json jsonResponse;
         json[] jsonResponseArray;
-
-        constructAuthHeader(authType, request);
+        constructAuthHeader(authType,request);
         response, httpError = jiraEndpoint.get("/project", request);
         jsonResponse, e = validateResponse(response, httpError);
 
         if (e != null) {
             return null, e;
         }
+
         else {
             jsonResponseArray, err = (json[])jsonResponse;
-            if (err != null) {
-                e = <JiraConnectorError, toConnectorError()>err;
-                return null, e;
+            if(err!=null){
+                e = <JiraConnectorError,toConnectorError()>err;
+                return null,e;
             }
             int x = 0;
-            foreach (jsonProject in jsonResponseArray) {
-
-                jsonProject.leadName = jsonProject.leadName == null ? "" : jsonProject.leadName.name == null ? "" : jsonProject.leadName.name;
-                jsonProject.issueTypes = jsonProject.issueTypes == null ? [] : jsonProject.issueTypes;
-                jsonProject.description = jsonProject.description == null ? "" : jsonProject.description;
-                jsonProject.components = jsonProject.components == null ? [] : jsonProject.components;
-
-                jsonProject.versions = jsonProject.versions == null ? [] : jsonProject.versions;
-
-                projects[x], err = <Project>jsonProject;
-                if (err != null) {
-                    e = <JiraConnectorError, toConnectorError()>err;
-                    return null, e;
+            foreach (i in jsonResponseArray) {
+                i["leadName"] = i["lead"]["name"];
+                i["email"] = "";
+                i["issueTypes"] = [];
+                projects[x], err = <Project>i;
+                if(err!=null){
+                    e = <JiraConnectorError,toConnectorError()>err;
+                    return null,e;
                 }
                 x = x + 1;
             }
@@ -91,7 +86,7 @@ public connector JiraConnector (AuthenticationType authType) {
         error err;
 
         json jsonResponse;
-        constructAuthHeader(authType, request);
+        constructAuthHeader(authType,request);
 
         response, httpError = jiraEndpoint.get("/project/" + projectIdOrKey, request);
         jsonResponse, e = validateResponse(response, httpError);
@@ -103,32 +98,32 @@ public connector JiraConnector (AuthenticationType authType) {
         else {
             jsonResponse["leadName"] = jsonResponse["lead"]["name"];
             project, err = <Project>jsonResponse;
-            e = <JiraConnectorError, toConnectorError()>err;
-            return project, e;
+            e = <JiraConnectorError,toConnectorError()>err;
+            return project,e;
         }
 
     }
 
 
-    action createNewProject (NewProject newProject) (boolean, JiraConnectorError) {
+    action createNewProject(NewProject newProject) (boolean, JiraConnectorError) {
         http:OutRequest request = {};
         http:InResponse response = {};
         JiraConnectorError e;
         error err;
         json jsonResponse;
         json jsonPayload;
-        constructAuthHeader(authType, request);
+        constructAuthHeader(authType,request);
 
-        jsonPayload, err = <json>newProject;
-        if (err != null) {
-            e = <JiraConnectorError, toConnectorError()>err;
-            return false, e;
+        jsonPayload,err= <json>newProject;
+        if(err!=null){
+            e = <JiraConnectorError,toConnectorError()>err;
+            return false,e;
         }
 
         request.setJsonPayload(jsonPayload);
 
 
-        response, httpError = jiraEndpoint.post("/project", request);
+        response, httpError = jiraEndpoint.post("/project",request);
         jsonResponse, e = validateResponse(response, httpError);
 
         if (e != null) {
@@ -263,7 +258,7 @@ public connector JiraConnector (AuthenticationType authType) {
     //}
 
 
-    action getAllProjectCategories () (ProjectCategory[], JiraConnectorError) {
+    action getAllProjectCategories()(ProjectCategory[],JiraConnectorError ){
         http:OutRequest request = {};
         http:InResponse response = {};
         ProjectCategory[] projectCategories = [];
@@ -271,7 +266,7 @@ public connector JiraConnector (AuthenticationType authType) {
         error err;
         json jsonResponse;
         json[] jsonResponseArray;
-        constructAuthHeader(authType, request);
+        constructAuthHeader(authType,request);
         response, httpError = jiraEndpoint.get("/projectCategory", request);
         jsonResponse, e = validateResponse(response, httpError);
 
@@ -284,9 +279,9 @@ public connector JiraConnector (AuthenticationType authType) {
             int x = 0;
             foreach (i in jsonResponseArray) {
                 projectCategories[x], err = <ProjectCategory>i;
-                if (err != null) {
-                    e = <JiraConnectorError, toConnectorError()>err;
-                    return null, e;
+                if(err!=null){
+                    e = <JiraConnectorError,toConnectorError()>err;
+                    return null,e;
                 }
                 x = x + 1;
             }
@@ -296,8 +291,7 @@ public connector JiraConnector (AuthenticationType authType) {
     }
 
 
-    action createNewProjectCategory (NewProjectCategory newCategory) (boolean, JiraConnectorError) {
-
+    action createNewProjectCategory(NewProjectCategory newCategory)(boolean,JiraConnectorError ){
         http:OutRequest request = {};
         http:InResponse response = {};
         JiraConnectorError e = null;
@@ -305,15 +299,16 @@ public connector JiraConnector (AuthenticationType authType) {
         json jsonResponse;
         json jsonPayload;
 
-        constructAuthHeader(authType, request);
+        constructAuthHeader(authType,request);
 
-        jsonPayload, err = <json>newCategory;
-        if (err != null) {
-            e = <JiraConnectorError, toConnectorError()>err;
-            return false, e;
+        jsonPayload,err = <json>newCategory;
+        if(err!=null){
+            e = <JiraConnectorError,toConnectorError()>err;
+            return false,e;
         }
 
         request.setJsonPayload(jsonPayload);
+
 
         response, httpError = jiraEndpoint.post("/projectCategory", request);
         jsonResponse, e = validateResponse(response, httpError);
@@ -322,29 +317,34 @@ public connector JiraConnector (AuthenticationType authType) {
         }
 
         else {
-            return true, null;
+            return true,null;
         }
 
     }
 
 
-    action deleteProjectCategory (string projectCategoryId) (boolean, JiraConnectorError) {
+    action deleteProjectCategory(string projectCategoryId)(boolean,JiraConnectorError ){
         http:OutRequest request = {};
         http:InResponse response = {};
         JiraConnectorError e = null;
         json jsonResponse;
 
-        constructAuthHeader(authType, request);
+        constructAuthHeader(authType,request);
 
-        response, httpError = jiraEndpoint.delete("/projectCategory/" + projectCategoryId, request);
+        response, httpError = jiraEndpoint.delete("/projectCategory/"+projectCategoryId, request);
         jsonResponse, e = validateResponse(response, httpError);
         if (e != null) {
             return false, e;
         }
         else {
-            return true, null;
+            return true,null;
         }
     }
+
+
+
+
+
 }
 
 
@@ -356,68 +356,72 @@ public connector JiraConnector (AuthenticationType authType) {
 @Description {value:"Add authoriaztion header to the request"}
 @Param {value:"authType: Authentication type preferred by the user"}
 @Param {value:"request: The http request object which is needed to be constructed"}
-function constructAuthHeader (AuthenticationType authType, http:OutRequest request) {
+function constructAuthHeader (AuthenticationType authType,http:OutRequest request) {
 
-    if (authType == AuthenticationType.BASIC) {
+    if (authType==AuthenticationType.BASIC){
 
         request.addHeader("Authorization", "Basic YXNoYW5Ad3NvMi5jb206YXNoYW4xMjM");
     }
 }
 
+
 @Description {value:"Checks whether the http response contains any errors "}
 @Param {value:"request: The http response object"}
-@Param {value:"httpError: http response error object"}
-function validateResponse (http:InResponse response, http:HttpConnectorError httpError) (json, JiraConnectorError) {
+@Param{value:"httpError: http response error object"}
+function validateResponse(http:InResponse response, http:HttpConnectorError httpError)(json,JiraConnectorError){
 
-    JiraConnectorError e = {|type|:null, message:"", cause:null};
+    JiraConnectorError e = {|type|:null, message:"" ,cause:null};
 
-    if (httpError != null) {
+    if(httpError!=null){
         e.|type| = "HTTP Error";
         e.message = httpError.message;
         e.cause = httpError.cause;
-        return null, e;
+        return null,e;
     }
-    else if (response.statusCode != constants:STATUS_CODE_OK && response.statusCode != constants:STATUS_CODE_CREATED
-             && response.statusCode != constants:STATUS_CODE_NO_CONTENT) {
+
+    else if(response.statusCode != constants:STATUS_CODE_OK && response.statusCode != constants:STATUS_CODE_CREATED && response.statusCode != constants:STATUS_CODE_NO_CONTENT){
         json res;
         io:println(response);
-        e.|type| = "Server Error";
+        e.|type|="Server Error";
         e.message = response.reasonPhrase;
-        e.message = "status " + <string>response.statusCode + ": " + e.message;
+        e.message = "status "+<string>response.statusCode + ": " + e.message;
         try {
             res = response.getJsonPayload();
             e.jiraServerErrorLog = res;
         }
-        catch (error err) {
+        catch(error err){
             io:println(err.message);
         }
-        return null, e;
+        return null,e;
 
     }
+
     else {
-        try {
+        try{
             json jsonResponse = response.getJsonPayload();
             io:println(jsonResponse);
-            return jsonResponse, null;
+            return jsonResponse,null;
         }
-        catch (error err) {
+        catch(error err){
             io:println(err.message);
         }
-        return null, null;
+        return null,null;
 
 
     }
 
 }
 
-function getHttpConfigs () (http:Options) {
+
+
+function getHttpConfigs() (http:Options) {
 
     http:Options option = {
-                              ssl:{
-                                      trustStoreFile:"${ballerina.home}/bre/security/ballerinaTruststore.p12",
-                                      trustStorePassword:"ballerina"
-                                  },
-                              followRedirects:{},
+                              ssl: {
+                                       trustStoreFile:"${ballerina.home}/bre/security/ballerinaTruststore.p12",
+                                       trustStorePassword:"ballerina"
+                                   },
+                              followRedirects: {},
                               chunking:"never"
                           };
     return option;
@@ -425,8 +429,8 @@ function getHttpConfigs () (http:Options) {
 
 
 
-transformer <error source, JiraConnectorError target> toConnectorError() {
-    target = source != null ? {message:source.message, cause:source.cause} : null;
+transformer<error source,JiraConnectorError target>toConnectorError() {
+    target = source!=null?{message:source.message,cause:source.cause}:null;
 }
 
 

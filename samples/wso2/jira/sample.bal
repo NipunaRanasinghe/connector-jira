@@ -1,9 +1,9 @@
 package samples.wso2.jira;
 
 //import ballerina.net.http;
-import src.wso2.jira;
 //import src.wso2.jira.models;
 import ballerina.io;
+import src.wso2.jira;
 //import src.wso2.jira.utils.constants;
 //import src.wso2.jira.connectors;
 
@@ -15,10 +15,10 @@ public function main (string[] args) {
     //    create jira:jiraProjectConnector();
     //}
 
-    endpoint <jira:JiraConnector> jiraConnector {
+    endpoint<jira:JiraConnector> jiraConnector {
         create jira:JiraConnector(jira:AuthenticationType.BASIC);
     }
-   // models:ProjectPointer[] pointer;
+    // models:ProjectPointer[] pointer;
     jira:JiraConnectorError e;
 
 
@@ -54,10 +54,10 @@ public function main (string[] args) {
 
 
 
-    //var pointers, e =  jiraProjectConnector.getAllProjects();
-    ////io:println(pointer);
-    //io:println(pointers);
-    //io:println(e);
+    var pointers, e =  jiraConnector.getAllProjectSummaries();
+    //io:println(pointer);
+    io:println(pointers);
+    io:println(e);
 
 
 
@@ -100,9 +100,9 @@ public function main (string[] args) {
     //io:println(pointer);
     //io:println(e);
 
-    var project, e =  jiraConnector.getProjectSummary("10314");
-    io:println(project);
-    io:println(e);
+    //var project, e = jiraConnector.getProject("10017");
+    //io:println(project);
+    //io:println(e);
 
 
 
@@ -110,13 +110,14 @@ public function main (string[] args) {
     //io:println(pointer2);
     //io:println(e);
 
-    var pointer2, e =  project.components[0].fetchComponent();
-    io:println(pointer2);
-    io:println(e);
 
-
-
-
+    //var pointer2, e = project.components[0].fetchComponent();
+    //io:println(pointer2);
+    //io:println(e);
+    //
+    //var pointer3, e = pointer2.getLeadDetails();
+    //io:println(pointer2);
+    //io:println(e);
 
 }
 

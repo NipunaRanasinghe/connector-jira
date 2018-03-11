@@ -1,5 +1,5 @@
 package src.wso2.jira;
-import  ballerina.io;
+import ballerina.io;
 import src.wso2.jira.utils.constants;
 import src.wso2.jira.models;
 import ballerina.net.http;
@@ -8,23 +8,24 @@ import ballerina.net.http;
 //                                               Jira Project                                                         //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-public struct ProjectSummary {
+public struct Project {
     string self;
     string id;
     string key;
     string name;
     string description;
     string leadName;
-    string email;
+    string projectTypeKey;
+    AvatarUrls avatarUrls;
     ProjectCategory projectCategory;
     IssueType[] issueTypes;
     ProjectComponentSummary[] components;
-    string projectTypeKey;
+    ProjectVersion[] versions;
 }
 
-public function <ProjectSummary project> getProjectLeadDetails()(User,JiraConnectorError){
-    endpoint<http:HttpClient> jiraClient{
-        create http:HttpClient (constants:JIRA_API_ENDPOINT,getHttpConfigs());
+public function <Project project> getProjectLeadDetails () (User, JiraConnectorError) {
+    endpoint<http:HttpClient> jiraClient {
+        create http:HttpClient(constants:JIRA_API_ENDPOINT, getHttpConfigs());
     }
     http:HttpConnectorError httpError;
     http:OutRequest request = {};
@@ -34,13 +35,13 @@ public function <ProjectSummary project> getProjectLeadDetails()(User,JiraConnec
     error err;
     User lead;
 
-    if(project==null) {
+    if (project == null) {
         e = {message:"Unable to proceed with a null structure", cause:null};
-        return null,e;
+        return null, e;
     }
 
-    constructAuthHeader(AuthenticationType.BASIC,request);
-    response, httpError = jiraClient.get("/user?username="+project.leadName, request);
+    constructAuthHeader(AuthenticationType.BASIC, request);
+    response, httpError = jiraClient.get("/user?username=" + project.leadName, request);
     jsonResponse, e = validateResponse(response, httpError);
 
     if (e != null) {
@@ -49,8 +50,8 @@ public function <ProjectSummary project> getProjectLeadDetails()(User,JiraConnec
 
     else {
         lead, err = <User>jsonResponse;
-        e = <JiraConnectorError,toConnectorError()>err;
-        return lead,e;
+        e = <JiraConnectorError, toConnectorError()>err;
+        return lead, e;
     }
 
 
@@ -58,9 +59,9 @@ public function <ProjectSummary project> getProjectLeadDetails()(User,JiraConnec
 }
 
 
-public function <ProjectSummary project> getRole(ProjectRoleType projectRoleType)(ProjectRole , JiraConnectorError ){
-    endpoint<http:HttpClient> jiraClient{
-        create http:HttpClient (constants:JIRA_API_ENDPOINT,getHttpConfigs());
+public function <Project project> getRole (ProjectRoleType projectRoleType) (ProjectRole, JiraConnectorError) {
+    endpoint<http:HttpClient> jiraClient {
+        create http:HttpClient(constants:JIRA_API_ENDPOINT, getHttpConfigs());
     }
     http:HttpConnectorError httpError;
     http:OutRequest request = {};
@@ -68,12 +69,12 @@ public function <ProjectSummary project> getRole(ProjectRoleType projectRoleType
     JiraConnectorError e;
     json jsonResponse;
 
-    if(project==null) {
+    if (project == null) {
         e = {message:"Unable to proceed with a null structure", cause:null};
-        return null,e;
+        return null, e;
     }
 
-    constructAuthHeader(AuthenticationType.BASIC,request);
+    constructAuthHeader(AuthenticationType.BASIC, request);
     response, httpError = jiraClient.get("/project/" + project.key + "/role/" + getProjectRoleIdFromEnum(projectRoleType), request);
     jsonResponse, e = validateResponse(response, httpError);
 
@@ -83,18 +84,18 @@ public function <ProjectSummary project> getRole(ProjectRoleType projectRoleType
 
     else {
         var role, err = <ProjectRole>jsonResponse;
-        if(err!=null){
-            e = <JiraConnectorError,toConnectorError()>err;
-            return null,e;
+        if (err != null) {
+            e = <JiraConnectorError, toConnectorError()>err;
+            return null, e;
         }
         return role, e;
     }
 }
 
 
-public function <ProjectSummary project> getStatuses()(ProjectStatus[], JiraConnectorError ){
-    endpoint<http:HttpClient> jiraClient{
-        create http:HttpClient (constants:JIRA_API_ENDPOINT,getHttpConfigs());
+public function <Project project> getAllStatuses () (ProjectStatus[], JiraConnectorError) {
+    endpoint<http:HttpClient> jiraClient {
+        create http:HttpClient(constants:JIRA_API_ENDPOINT, getHttpConfigs());
     }
     http:HttpConnectorError httpError;
 
@@ -106,13 +107,13 @@ public function <ProjectSummary project> getStatuses()(ProjectStatus[], JiraConn
     json[] jsonResponseArray;
     ProjectStatus[] statusArray = [];
 
-    if(project==null) {
+    if (project == null) {
         e = {message:"Unable to proceed with a null structure", cause:null};
-        return null,e;
+        return null, e;
     }
 
-    constructAuthHeader(AuthenticationType.BASIC,request);
-    response, httpError = jiraClient.get("/project/" + project.key +"/statuses", request);
+    constructAuthHeader(AuthenticationType.BASIC, request);
+    response, httpError = jiraClient.get("/project/" + project.key + "/statuses", request);
     jsonResponse, e = validateResponse(response, httpError);
 
     if (e != null) {
@@ -120,32 +121,32 @@ public function <ProjectSummary project> getStatuses()(ProjectStatus[], JiraConn
     }
 
     else {
-        jsonResponseArray,err = (json[])jsonResponse;
-        if(err!=null){
-            e = <JiraConnectorError,toConnectorError()>err;
-            return null,e;
+        jsonResponseArray, err = (json[])jsonResponse;
+        if (err != null) {
+            e = <JiraConnectorError, toConnectorError()>err;
+            return null, e;
         }
         else {
             int x = 0;
             foreach (i in jsonResponseArray) {
-                statusArray[x],err = <ProjectStatus>jsonResponseArray[x];
-                if(err!=null){
-                    e = <JiraConnectorError,toConnectorError()>err;
-                    return null,e;
+                statusArray[x], err = <ProjectStatus>jsonResponseArray[x];
+                if (err != null) {
+                    e = <JiraConnectorError, toConnectorError()>err;
+                    return null, e;
                 }
-                x=x+1;
+                x = x + 1;
             }
 
-            return statusArray,null;
+            return statusArray, null;
         }
     }
 
 }
 
 
-public function <ProjectSummary project> addActorToRole(ProjectRoleType projectRoleType,SetActor actor)(boolean,JiraConnectorError){
-    endpoint<http:HttpClient> jiraClient{
-        create http:HttpClient (constants:JIRA_API_ENDPOINT,getHttpConfigs());
+public function <Project project> addActorToRole (ProjectRoleType projectRoleType, SetActor actor) (boolean, JiraConnectorError) {
+    endpoint<http:HttpClient> jiraClient {
+        create http:HttpClient(constants:JIRA_API_ENDPOINT, getHttpConfigs());
     }
     http:HttpConnectorError httpError;
     http:OutRequest request = {};
@@ -154,25 +155,25 @@ public function <ProjectSummary project> addActorToRole(ProjectRoleType projectR
     json jsonPayload;
     json jsonResponse;
 
-    constructAuthHeader(AuthenticationType.BASIC,request);
+    constructAuthHeader(AuthenticationType.BASIC, request);
 
     jsonPayload = models:addActorToRoleSchema;
 
-    if(actor.|type|==ActorType.USER) {
-        jsonPayload["user"][0]= actor.name;
+    if (actor.|type| == ActorType.USER) {
+        jsonPayload["user"][0] = actor.name;
     }
 
-    else if(actor.|type|==ActorType.GROUP) {
-        jsonPayload["group"][0]= actor.name;
+    else if (actor.|type| == ActorType.GROUP) {
+        jsonPayload["group"][0] = actor.name;
     }
 
-    else{
-        e.message="actor type is not specified correctly";
-        return false,e;
+    else {
+        e.message = "actor type is not specified correctly";
+        return false, e;
     }
 
     request.setJsonPayload(jsonPayload);
-    response, httpError = jiraClient.post("/project/" + project.key +"/role/"+ getProjectRoleIdFromEnum(projectRoleType), request);
+    response, httpError = jiraClient.post("/project/" + project.key + "/role/" + getProjectRoleIdFromEnum(projectRoleType), request);
     jsonResponse, e = validateResponse(response, httpError);
 
     if (e != null) {
@@ -187,9 +188,9 @@ public function <ProjectSummary project> addActorToRole(ProjectRoleType projectR
 }
 
 
-public function <ProjectSummary project> updateProjectType(ProjectType newProjectType)(boolean,JiraConnectorError){
-    endpoint<http:HttpClient> jiraClient{
-        create http:HttpClient (constants:JIRA_API_ENDPOINT,getHttpConfigs());
+public function <Project project> updateProjectType (ProjectType newProjectType) (boolean, JiraConnectorError) {
+    endpoint<http:HttpClient> jiraClient {
+        create http:HttpClient(constants:JIRA_API_ENDPOINT, getHttpConfigs());
     }
     http:HttpConnectorError httpError;
 
@@ -198,10 +199,10 @@ public function <ProjectSummary project> updateProjectType(ProjectType newProjec
     JiraConnectorError e = {message:""};
     json jsonResponse;
 
-    constructAuthHeader(AuthenticationType.BASIC,request);
+    constructAuthHeader(AuthenticationType.BASIC, request);
 
 
-    response, httpError = jiraClient.put("/project/" + project.key +"/type/"+ getProjectTypeFromEnum(newProjectType), request);
+    response, httpError = jiraClient.put("/project/" + project.key + "/type/" + getProjectTypeFromEnum(newProjectType), request);
     jsonResponse, e = validateResponse(response, httpError);
 
     if (e != null) {
@@ -214,55 +215,6 @@ public function <ProjectSummary project> updateProjectType(ProjectType newProjec
 
 }
 
-
-//public function <ProjectSummary project> getAllComponents()(ProjectComponent[], JiraConnectorError ){
-//    endpoint<http:HttpClient> jiraClient{
-//        create http:HttpClient (constants:JIRA_API_ENDPOINT,getHttpConfigs());
-//    }
-//    http:HttpConnectorError httpError;
-//
-//    http:OutRequest request = {};
-//    http:InResponse response = {};
-//    JiraConnectorError e;
-//    error err;
-//    json jsonResponse;
-//    json[] jsonResponseArray;
-//    ProjectStatus[] statusArray = [];
-//
-//    if(project==null) {
-//        e = {message:"Unable to proceed with a null structure", cause:null};
-//        return null,e;
-//    }
-//
-//    constructAuthHeader(AuthenticationType.BASIC,request);
-//    response, httpError = jiraClient.get("/project/" + project.key +"/statuses", request);
-//    jsonResponse, e = validateResponse(response, httpError);
-//
-//    if (e != null) {
-//        return null, e;
-//    }
-//
-//    else {
-//        jsonResponseArray,err = (json[])jsonResponse;
-//        if(err!=null){
-//            e = <JiraConnectorError,toConnectorError()>err;
-//            return null,e;
-//        }
-//        else {
-//            int x = 0;
-//            foreach (i in jsonResponseArray) {
-//                statusArray[x],err = <ProjectStatus>jsonResponseArray[x];
-//                if(err!=null){
-//                    e = <JiraConnectorError,toConnectorError()>err;
-//                    return null,e;
-//                }
-//                x=x+1;
-//            }
-//
-//            return statusArray,null;
-//        }
-//    }
-//}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -302,7 +254,7 @@ public struct Actor {
 }
 
 
-public struct ProjectStatus{
+public struct ProjectStatus {
     string self;
     string name;
     string id;
@@ -310,7 +262,7 @@ public struct ProjectStatus{
 }
 
 
-public struct User{
+public struct User {
     string self;
     string key;
     string name;
@@ -323,12 +275,12 @@ public struct User{
 }
 
 
-public struct SetActor{
+public struct SetActor {
     ActorType |type|;
     string name;
 }
 
-public struct NewProjectCategory{
+public struct NewProjectCategory {
     string name;
     string description;
 }
@@ -353,8 +305,7 @@ public struct NewProject {
 }
 
 
-
-public struct JiraConnectorError{
+public struct JiraConnectorError {
     string |type|;
     string message;
     json jiraServerErrorLog;
@@ -362,37 +313,7 @@ public struct JiraConnectorError{
 }
 
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                         Enums                                                      //
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-public enum AuthenticationType{
-    BASIC
-}
-
-
-public enum ActorType{
-    GROUP,USER
-}
-
-public enum AssigneeType {
-    PROJECTLEAD,UNASSIGNED
-}
-
-public enum ProjectRoleType{
-    DEVELOPERS,EXTERNAL_CONSULTANT,OBSERVER,ADMINISTRATORS,USERS,CSAT_ADMINISTRATORS,NOTIFICATIONS
-}
-
-public enum ProjectType{
-    SOFTWARE,BUSINESS
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-public struct IssueType{
+public struct IssueType {
     string self;
     string id;
     string name;
@@ -402,11 +323,71 @@ public struct IssueType{
 }
 
 
+public struct ProjectVersion {
+    string self;
+    string id;
+    string name;
+    boolean archived;
+    boolean released;
+    string releaseDate;
+    boolean overdue;
+    string userReleaseDate;
+    string projectId;
+}
+
+public struct AvatarUrls{
+    string |16x16|;
+    string |24x24|;
+    string |32x32|;
+    string |48x48|;
+}
+
+public struct Avatar{
+    string id;
+    boolean isSystemAvatar;
+    boolean isSelected;
+    boolean isDeletable;
+    AvatarUrls urls;
+    boolean selected;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                         Enums                                                      //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+public enum AuthenticationType {
+    BASIC
+}
+
+
+public enum ActorType {
+    GROUP, USER
+}
+
+public enum AssigneeType {
+    PROJECTLEAD, UNASSIGNED
+}
+
+public enum ProjectRoleType {
+    DEVELOPERS, EXTERNAL_CONSULTANT, OBSERVER, ADMINISTRATORS, USERS, CSAT_ADMINISTRATORS, NOTIFICATIONS
+}
+
+public enum ProjectType {
+    SOFTWARE, BUSINESS
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                   Component                                                        //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-public struct ProjectComponent{
+public struct ProjectComponent {
     string self;
     string id;
     string name;
@@ -421,16 +402,16 @@ public struct ProjectComponent{
     string projectId;
 }
 
-public struct ProjectComponentSummary{
+public struct ProjectComponentSummary {
     string self;
     string id;
     string name;
     string description;
 }
 
-public function <ProjectComponentSummary projectComponentSummary> fetchComponent()(ProjectComponent,JiraConnectorError){
-    endpoint<http:HttpClient> jiraClient{
-        create http:HttpClient (constants:JIRA_API_ENDPOINT,getHttpConfigs());
+public function <ProjectComponentSummary projectComponentSummary> fetchComponent () (ProjectComponent, JiraConnectorError) {
+    endpoint<http:HttpClient> jiraClient {
+        create http:HttpClient(constants:JIRA_API_ENDPOINT, getHttpConfigs());
     }
     http:HttpConnectorError httpError;
 
@@ -439,15 +420,14 @@ public function <ProjectComponentSummary projectComponentSummary> fetchComponent
     JiraConnectorError e;
     error err;
     json jsonResponse;
-    json[] jsonResponseArray;
 
 
-    if(projectComponentSummary==null) {
+    if (projectComponentSummary == null) {
         e = {message:"Unable to proceed with a null structure", cause:null};
-        return null,e;
+        return null, e;
     }
 
-    constructAuthHeader(AuthenticationType.BASIC,request);
+    constructAuthHeader(AuthenticationType.BASIC, request);
     response, httpError = jiraClient.get("/component/" + projectComponentSummary.id, request);
     jsonResponse, e = validateResponse(response, httpError);
 
@@ -456,35 +436,110 @@ public function <ProjectComponentSummary projectComponentSummary> fetchComponent
     }
 
     else {
-        var projectComponent,err = <ProjectComponent>jsonResponse;
-        if(err!=null){
-            e = <JiraConnectorError,toConnectorError()>err;
-            return null,e;
+        try {
+            jsonResponse["leadName"] = jsonResponse["lead"]["name"];
+            jsonResponse["assigneeName"] = jsonResponse["assignee"]["name"];
+            jsonResponse["realAssigneeName"] = jsonResponse["realAssignee"]["name"];
         }
-        return projectComponent,e;
+        catch (error er) {
+            e = <JiraConnectorError, toConnectorError()>err;
+            return null, e;
+        }
+
+        var projectComponent, err = <ProjectComponent>jsonResponse;
+        if (err != null) {
+            e = <JiraConnectorError, toConnectorError()>err;
+            return null, e;
+        }
+        return projectComponent, e;
     }
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+public function <ProjectComponent projectComponent> getLeadDetails () (User, JiraConnectorError) {
+    endpoint<http:HttpClient> jiraClient {
+        create http:HttpClient(constants:JIRA_API_ENDPOINT, getHttpConfigs());
+    }
+    http:HttpConnectorError httpError;
 
+    http:OutRequest request = {};
+    http:InResponse response = {};
+    JiraConnectorError e;
+    error err;
+    json jsonResponse;
 
+    if (projectComponent == null) {
+        e = {message:"Unable to proceed with a null structure", cause:null};
+        return null, e;
+    }
 
+    constructAuthHeader(AuthenticationType.BASIC, request);
+    response, httpError = jiraClient.get("/user?username=" + projectComponent.leadName, request);
+    jsonResponse, e = validateResponse(response, httpError);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    if (e != null) {
+        return null, e;
+    }
 
-function getProjectRoleIdFromEnum(ProjectRoleType |type|)(string){
-    if (|type|==ProjectRoleType.ADMINISTRATORS) {return constants:ROLE_ID_ADMINISTRATORS;}
-    else if (|type|==ProjectRoleType.CSAT_ADMINISTRATORS) {return constants:ROLE_ID_CSAT_DEVELOPERS;}
-    else if (|type|==ProjectRoleType.DEVELOPERS) {return constants:ROLE_ID_DEVELOPERS;}
-    else if (|type|==ProjectRoleType.EXTERNAL_CONSULTANT) {return constants:ROLE_ID_EXTERNAL_CONSULTANTS;}
-    else if (|type|==ProjectRoleType.NOTIFICATIONS) {return constants:ROLE_ID_NOTIFICATIONS;}
-    else if (|type|==ProjectRoleType.OBSERVER) {return constants:ROLE_ID_OBSERVER;}
-    else if (|type|==ProjectRoleType.USERS) {return constants:ROLE_ID_USERS;}
-    else{ return "";}
+    else {
+        var lead, err = <User>jsonResponse;
+        e = <JiraConnectorError, toConnectorError()>err;
+        return lead, e;
+    }
 }
 
-function getProjectTypeFromEnum(ProjectType projectType)(string){
-    return (projectType==ProjectType.SOFTWARE?"software":"business");
+public function <ProjectComponent projectComponent> getAssigneeDetails () (User, JiraConnectorError) {
+    endpoint<http:HttpClient> jiraClient {
+        create http:HttpClient(constants:JIRA_API_ENDPOINT, getHttpConfigs());
+    }
+    http:HttpConnectorError httpError;
+
+    http:OutRequest request = {};
+    http:InResponse response = {};
+    JiraConnectorError e;
+    error err;
+    json jsonResponse;
+
+    if (projectComponent == null) {
+        e = {message:"Unable to proceed with a null structure", cause:null};
+        return null, e;
+    }
+
+    constructAuthHeader(AuthenticationType.BASIC, request);
+    response, httpError = jiraClient.get("/user?username=" + projectComponent.assigneeName, request);
+    jsonResponse, e = validateResponse(response, httpError);
+
+    if (e != null) {
+        return null, e;
+    }
+
+    else {
+        var lead, err = <User>jsonResponse;
+        e = <JiraConnectorError, toConnectorError()>err;
+        return lead, e;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function getProjectRoleIdFromEnum (ProjectRoleType |type|) (string) {
+    if (|type| == ProjectRoleType.ADMINISTRATORS) {return constants:ROLE_ID_ADMINISTRATORS;}
+                                                                                           else if (|type| == ProjectRoleType.CSAT_ADMINISTRATORS) {return constants:ROLE_ID_CSAT_DEVELOPERS;}
+                                                                                                                                                                                             else if (|type| == ProjectRoleType.DEVELOPERS) {return constants:ROLE_ID_DEVELOPERS;}
+                                                                                                                                                                                                                                                                                 else if (|type| == ProjectRoleType.EXTERNAL_CONSULTANT) {return constants:ROLE_ID_EXTERNAL_CONSULTANTS;}
+                                                                                                                                                                                                                                                                                                                                                                                        else if (|type| == ProjectRoleType.NOTIFICATIONS) {return constants:ROLE_ID_NOTIFICATIONS;}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  else if (|type| == ProjectRoleType.OBSERVER) {return constants:ROLE_ID_OBSERVER;}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  else if (|type| == ProjectRoleType.USERS) {return constants:ROLE_ID_USERS;}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            else { return "";}
+}
+
+function getProjectTypeFromEnum (ProjectType projectType) (string) {
+    return (projectType == ProjectType.SOFTWARE ? "software" : "business");
 }
 
 

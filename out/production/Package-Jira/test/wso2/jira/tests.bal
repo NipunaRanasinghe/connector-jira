@@ -5,19 +5,20 @@ import ballerina.util;
 import ballerina.mime;
 import ballerina.io;
 
-function testBoolean () {
-    test:assertBooleanEquals(true,false, "Value doesn't match");
-    io:println("Hello World!");
 
-
-
-
-}
-public enum State {
-    OPEN,
-    CLOSED,
-    ALL
-}
 public function main (string[] args)  {
-    io:println(typeof State.OPEN);
+    SampleStruct source = {name:"Nipuna",state:State.OPEN};
+    var target,_ = <json>source;
+}
+
+
+
+
+public struct SampleStruct {
+    string name;
+    State state;
+}
+
+public enum State{
+    OPEN,CLOSED
 }

@@ -1,2 +1,2 @@
-# connector-github
-Ballerina GitHub Connector 
+# connector-jira
+Ballerina Jira Connector 
