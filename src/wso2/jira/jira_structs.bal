@@ -69,9 +69,6 @@ public function <Project project> getProjectLeadUserDetails () (User, JiraConnec
         e = <JiraConnectorError, toConnectorError()>err;
         return lead, e;
     }
-
-
-
 }
 
 public function <Project project> getRole (ProjectRoleType projectRoleType) (ProjectRole, JiraConnectorError) {
@@ -119,6 +116,15 @@ public function <Project project> addActorToRole (ProjectRoleType projectRoleTyp
     json jsonPayload;
     json jsonResponse;
 
+    if (project == null) {
+        e = {message:"Unable to proceed with a null structure: Project", cause:null};
+        return false, e;
+    }
+    if(actor== null){
+        e = {message:"Unable to proceed with a null structure: NewActor", cause:null};
+        return false, e;
+    }
+
     constructAuthHeader(AuthenticationType.BASIC, request);
     if (actor.|type| == ActorType.USER) {
         jsonPayload = {};
@@ -161,6 +167,19 @@ public function <Project project> removeActorFromRole (ProjectRoleType projectRo
     json jsonResponse;
     string queryParam;
 
+    if (project == null) {
+        e = {message:"Unable to proceed with a null structure: Project", cause:null};
+        return false, e;
+    }
+    if(projectRoleType == null){
+        e = {message:"Unable to proceed with a null structure: ProjectRoleType", cause:null};
+        return false, e;
+    }
+    if(actorType == null){
+        e = {message:"Unable to proceed with a null structure: ActorType", cause:null};
+        return false, e;
+    }
+
     constructAuthHeader(AuthenticationType.BASIC, request);
 
     if (actorType == ActorType.USER) {
@@ -182,12 +201,9 @@ public function <Project project> removeActorFromRole (ProjectRoleType projectRo
     if (e != null) {
         return false, e;
     }
-
     else {
-
         return true, null;
     }
-
 }
 
 @Description {value:"Gets all issue types with valid status values for a project."}
@@ -196,7 +212,6 @@ public function <Project project> getAllStatuses () (ProjectStatus[], JiraConnec
         create http:HttpClient(constants:JIRA_API_ENDPOINT, getHttpConfigs());
     }
     http:HttpConnectorError httpError;
-
     http:OutRequest request = {};
     http:InResponse response = {};
     JiraConnectorError e;
@@ -206,7 +221,7 @@ public function <Project project> getAllStatuses () (ProjectStatus[], JiraConnec
     ProjectStatus[] statusArray = [];
 
     if (project == null) {
-        e = {message:"Unable to proceed with a null structure", cause:null};
+        e = {message:"Unable to proceed with a null structure: Project", cause:null};
         return null, e;
     }
 
@@ -247,14 +262,21 @@ public function <Project project> changeProjectType (ProjectType newProjectType)
         create http:HttpClient(constants:JIRA_API_ENDPOINT, getHttpConfigs());
     }
     http:HttpConnectorError httpError;
-
     http:OutRequest request = {};
     http:InResponse response = {};
-    JiraConnectorError e = {message:""};
+    JiraConnectorError e;
     json jsonResponse;
 
-    constructAuthHeader(AuthenticationType.BASIC, request);
+    if(project == null){
+        e = {message:"Unable to proceed with a null structure: Project", cause:null};
+        return false, e;
+    }
+    if(newProjectType == null){
+        e = {message:"Unable to proceed with a null structure: ProjectType", cause:null};
+        return false, e;
+    }
 
+    constructAuthHeader(AuthenticationType.BASIC, request);
 
     response, httpError = jiraClient.put("/project/" + project.key + "/type/" + getProjectTypeFromEnum(newProjectType), request);
     jsonResponse, e = validateResponse(response, httpError);
@@ -262,7 +284,6 @@ public function <Project project> changeProjectType (ProjectType newProjectType)
     if (e != null) {
         return false, e;
     }
-
     else {
         return true, null;
     }
@@ -272,12 +293,13 @@ public function <Project project> changeProjectType (ProjectType newProjectType)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-struct Authentication {
+public struct Authentication {
     string username;
     string password;
+    AuthenticationType authenticationType;
 }
 
-struct BasicAuthBase64 {
+public struct BasicAuthBase64 {
     string token;
 }
 
@@ -436,7 +458,7 @@ public function <ProjectComponentSummary projectComponentSummary> expandComponen
 
 
     if (projectComponentSummary == null) {
-        e = {message:"Unable to proceed with a null structure", cause:null};
+        e = {message:"Unable to proceed with a null structure: ProjectComponentSummary", cause:null};
         return null, e;
     }
 

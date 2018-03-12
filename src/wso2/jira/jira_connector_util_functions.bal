@@ -97,3 +97,21 @@ public function getHttpConfigs () (http:Options) {
 transformer <error source, JiraConnectorError target> toConnectorError() {
     target = source != null ? {message:source.message, cause:source.cause} : null;
 }
+
+
+
+transformer <ProjectUpdate source, json target> toJsonProject() {
+    target.key = source.key != "" ? (json)source.key : null;
+    target.name = source.name != "" ? (json)source.name : null;
+    target.projectTypeKey = source.projectTypeKey != "" ? (json)source.projectTypeKey : null;
+    target.projectTemplateKey = source.projectTemplateKey != "" ? (json)source.projectTemplateKey : null;
+    target.description = source.description != "" ? (json)source.description : null;
+    target.lead = source.lead != "" ? (json)source.lead : null;
+    target.url = source.lead != "" ? (json)source.url : null;
+    target.assigneeType = source.assigneeType!=""?(json)source.assigneeType:null;
+    target.avatarId = source.avatarId!=0?(json)source.avatarId:null;
+    target.issueSecurityScheme = source.issueSecurityScheme!=0?(json)source.issueSecurityScheme:null;
+    target.permissionScheme = source.permissionScheme!=0?(json)source.permissionScheme:null;
+    target.notificationScheme = source.notificationScheme!=0?(json)source.notificationScheme:null;
+    target.categoryId = source.categoryId!=0?(json)source.categoryId:null;
+}

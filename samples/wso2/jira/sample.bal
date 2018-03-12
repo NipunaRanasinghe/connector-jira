@@ -7,7 +7,6 @@ import src.wso2.jira;
 public function main (string[] args) {
 
 
-
     endpoint<jira:JiraConnector> jiraConnector {
         create jira:JiraConnector(jira:AuthenticationType.BASIC);
     }
@@ -18,6 +17,7 @@ public function main (string[] args) {
 
     jira:JiraConnectorError e;
     boolean result;
+
 
     //var role,e = jiraConnector.getProjectRole("10314",constants:ROLE_ID_DEVELOPERS);
     //io:println(role.description);
@@ -173,18 +173,18 @@ public function main (string[] args) {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //                                        Samples - Jira Project Category                                         //
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
+    //
+    //
     //var pointer, e =  jiraConnector.getProjectStatuses("10314");
     //io:println(pointer[0]);
     //io:println(e);
-
+    //
     //jira:SetActor newActor = {name:"support.client.AAALIFEDEV.user",|type|:jira:ActorType.GROUP};
     //var pointer, e =  jiraConnector.addActorToProject("10314",constants:ROLE_ID_DEVELOPERS,newActor);
     //io:println(pointer);
     //io:println(e);
-
-
+    //
+    //
     //jira:SetProjectCategory newCategory = {name:"new",description:"newCategory"};
     //var pointer, e =  jiraConnector.createNewProjectCategory(newCategory);
     //io:println(pointer);
@@ -194,16 +194,16 @@ public function main (string[] args) {
     //var pointer, e =  jiraConnector.deleteProjectCategory("10571");
     //io:println(pointer);
     //io:println(e);
-
-
-
-
-
+    //
+    //
+    //
+    //
+    //
     //var pointer2, e =  project.updateProjectType(jira:ProjectType.SOFTWARE);
     //io:println(pointer2);
     //io:println(e);
-
-
+    //
+    //
     //var pointer2, e = project.components[0].fetchComponent();
     //io:println(pointer2);
     //io:println(e);

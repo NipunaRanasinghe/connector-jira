@@ -20,10 +20,12 @@ package src.wso2.jira;
 import ballerina.net.http;
 import src.wso2.jira.utils.constants;
 
+//global variables to provide authentication in bind functions
 
 
 @Description {value:"Jira client connector"}
-@Param {value:""}
+@Param {value:"username: Jira account username"}
+@Param {value:"password: Jira user account password"}
 public connector JiraConnector (AuthenticationType authType) {
 
     //creates HttpClient Endpoint
@@ -31,6 +33,7 @@ public connector JiraConnector (AuthenticationType authType) {
         create http:HttpClient(constants:JIRA_API_ENDPOINT, getHttpConfigs());
     }
     http:HttpConnectorError httpError;
+
 
     action getAllProjectSummaries () (Project[], JiraConnectorError) {
         http:OutRequest request = {};
@@ -57,8 +60,8 @@ public connector JiraConnector (AuthenticationType authType) {
             int x = 0;
             foreach (jsonProject in jsonResponseArray) {
 
-                jsonProject.leadName = jsonProject.leadName == null ? "" :
-                                       jsonProject.leadName.name == null ? "" : jsonProject.leadName.name;
+                jsonProject.leadName = jsonProject.lead == null ? "" :
+                                       jsonProject.lead.name == null ? "" : jsonProject.lead.name;
                 jsonProject.issueTypes = jsonProject.issueTypes == null ? [] : jsonProject.issueTypes;
                 jsonProject.description = jsonProject.description == null ? "" : jsonProject.description;
                 jsonProject.components = jsonProject.components == null ? [] : jsonProject.components;
@@ -144,15 +147,13 @@ public connector JiraConnector (AuthenticationType authType) {
         json jsonPayload;
         constructAuthHeader(authType, request);
 
-
-        jsonPayload, err = <json>update;
+        jsonPayload = <json,toJsonProject()>update;
         if (err != null) {
             e = <JiraConnectorError, toConnectorError()>err;
             return false, e;
         }
 
         request.setJsonPayload(jsonPayload);
-
 
         response, httpError = jiraEndpoint.put("/project/"+projectIdOrKey, request);
         jsonResponse, e = validateResponse(response, httpError);
