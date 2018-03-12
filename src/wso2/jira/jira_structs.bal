@@ -23,7 +23,7 @@ public struct Project {
     ProjectVersion[] versions;
 }
 
-public function <Project project> getProjectLeadDetails () (User, JiraConnectorError) {
+public function <Project project> getProjectLeadUserDetails () (User, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
         create http:HttpClient(constants:JIRA_API_ENDPOINT, getHttpConfigs());
     }
@@ -58,7 +58,6 @@ public function <Project project> getProjectLeadDetails () (User, JiraConnectorE
 
 }
 
-
 public function <Project project> getRole (ProjectRoleType projectRoleType) (ProjectRole, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
         create http:HttpClient(constants:JIRA_API_ENDPOINT, getHttpConfigs());
@@ -75,7 +74,8 @@ public function <Project project> getRole (ProjectRoleType projectRoleType) (Pro
     }
 
     constructAuthHeader(AuthenticationType.BASIC, request);
-    response, httpError = jiraClient.get("/project/" + project.key + "/role/" + getProjectRoleIdFromEnum(projectRoleType), request);
+    response, httpError = jiraClient.get("/project/" + project.key + "/role/" +
+                                         getProjectRoleIdFromEnum(projectRoleType), request);
     jsonResponse, e = validateResponse(response, httpError);
 
     if (e != null) {
@@ -92,7 +92,92 @@ public function <Project project> getRole (ProjectRoleType projectRoleType) (Pro
     }
 }
 
+public function <Project project> addActorToRole (ProjectRoleType projectRoleType, NewActor actor) (boolean, JiraConnectorError) {
+    endpoint<http:HttpClient> jiraClient {
+        create http:HttpClient(constants:JIRA_API_ENDPOINT, getHttpConfigs());
+    }
+    http:HttpConnectorError httpError;
+    http:OutRequest request = {};
+    http:InResponse response = {};
+    JiraConnectorError e = {message:""};
+    json jsonPayload;
+    json jsonResponse;
 
+    constructAuthHeader(AuthenticationType.BASIC, request);
+
+    jsonPayload = models:addActorToRoleSchema;
+
+    if (actor.|type| == ActorType.USER) {
+        jsonPayload["user"][0] = actor.name;
+    }
+
+    else if (actor.|type| == ActorType.GROUP) {
+        jsonPayload["group"][0] = actor.name;
+    }
+
+    else {
+        e.message = "actor type is not specified correctly";
+        return false, e;
+    }
+
+    request.setJsonPayload(jsonPayload);
+    response, httpError = jiraClient.post("/project/" + project.key + "/role/" +
+                                          getProjectRoleIdFromEnum(projectRoleType), request);
+    jsonResponse, e = validateResponse(response, httpError);
+
+    if (e != null) {
+        return false, e;
+    }
+
+    else {
+        io:println(jsonResponse);
+        return true, null;
+    }
+
+}
+
+public function <Project project> removeActorFromRole (ProjectRoleType projectRoleType, string actorName,ActorType actorType) (boolean, JiraConnectorError) {
+    endpoint<http:HttpClient> jiraClient {
+        create http:HttpClient(constants:JIRA_API_ENDPOINT, getHttpConfigs());
+    }
+    http:HttpConnectorError httpError;
+    http:OutRequest request = {};
+    http:InResponse response = {};
+    JiraConnectorError e = {message:""};
+    json jsonPayload;
+    json jsonResponse;
+    string queryParam;
+
+    constructAuthHeader(AuthenticationType.BASIC, request);
+
+    if (actorType == ActorType.USER) {
+        queryParam = "?user="+actorName;
+    }
+    else if (actorType == ActorType.GROUP) {
+        queryParam = "?group="+actorName;
+    }
+    else {
+        e.message = "actor type is not specified correctly";
+        return false, e;
+    }
+
+
+    response, httpError = jiraClient.delete("/project/" + project.key + "/role/" +
+                                          getProjectRoleIdFromEnum(projectRoleType)+queryParam, request);
+    jsonResponse, e = validateResponse(response, httpError);
+
+    if (e != null) {
+        return false, e;
+    }
+
+    else {
+        io:println(jsonResponse);
+        return true, null;
+    }
+
+}
+
+@Description {value:"Gets all issue types with valid status values for a project."}
 public function <Project project> getAllStatuses () (ProjectStatus[], JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
         create http:HttpClient(constants:JIRA_API_ENDPOINT, getHttpConfigs());
@@ -143,51 +228,7 @@ public function <Project project> getAllStatuses () (ProjectStatus[], JiraConnec
 
 }
 
-
-public function <Project project> addActorToRole (ProjectRoleType projectRoleType, SetActor actor) (boolean, JiraConnectorError) {
-    endpoint<http:HttpClient> jiraClient {
-        create http:HttpClient(constants:JIRA_API_ENDPOINT, getHttpConfigs());
-    }
-    http:HttpConnectorError httpError;
-    http:OutRequest request = {};
-    http:InResponse response = {};
-    JiraConnectorError e = {message:""};
-    json jsonPayload;
-    json jsonResponse;
-
-    constructAuthHeader(AuthenticationType.BASIC, request);
-
-    jsonPayload = models:addActorToRoleSchema;
-
-    if (actor.|type| == ActorType.USER) {
-        jsonPayload["user"][0] = actor.name;
-    }
-
-    else if (actor.|type| == ActorType.GROUP) {
-        jsonPayload["group"][0] = actor.name;
-    }
-
-    else {
-        e.message = "actor type is not specified correctly";
-        return false, e;
-    }
-
-    request.setJsonPayload(jsonPayload);
-    response, httpError = jiraClient.post("/project/" + project.key + "/role/" + getProjectRoleIdFromEnum(projectRoleType), request);
-    jsonResponse, e = validateResponse(response, httpError);
-
-    if (e != null) {
-        return false, e;
-    }
-
-    else {
-        io:println(jsonResponse);
-        return true, null;
-    }
-
-}
-
-
+@Description {value:"Updates the type of a project."}
 public function <Project project> updateProjectType (ProjectType newProjectType) (boolean, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
         create http:HttpClient(constants:JIRA_API_ENDPOINT, getHttpConfigs());
@@ -215,20 +256,17 @@ public function <Project project> updateProjectType (ProjectType newProjectType)
 
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-struct BasicAuth {
+struct Authentication {
     string username;
     string password;
 }
 
-
 struct BasicAuthBase64 {
     string token;
 }
-
 
 public struct ProjectCategory {
     string self;
@@ -236,8 +274,6 @@ public struct ProjectCategory {
     string name;
     string description;
 }
-
-
 
 public struct ProjectRole {
     string self;
@@ -253,14 +289,12 @@ public struct Actor {
     string |type|;
 }
 
-
 public struct ProjectStatus {
     string self;
     string name;
     string id;
     json statuses;
 }
-
 
 public struct User {
     string self;
@@ -274,8 +308,7 @@ public struct User {
     string locale;
 }
 
-
-public struct SetActor {
+public struct NewActor {
     ActorType |type|;
     string name;
 }
@@ -285,7 +318,21 @@ public struct NewProjectCategory {
     string description;
 }
 
-
+public struct SetProject {
+    string key;
+    string name;
+    string projectTypeKey;
+    string projectTemplateKey;
+    string description;
+    string lead;
+    string url;
+    string assigneeType;
+    int avatarId;
+    int issueSecurityScheme;
+    int permissionScheme;
+    int notificationScheme;
+    int categoryId;
+}
 
 public struct NewProject {
     string key;
@@ -296,7 +343,6 @@ public struct NewProject {
     string lead;
     string url;
     string assigneeType;
-    //AssigneeType assigneeType;
     int avatarId;
     int issueSecurityScheme;
     int permissionScheme;
@@ -304,14 +350,12 @@ public struct NewProject {
     int categoryId;
 }
 
-
 public struct JiraConnectorError {
     string |type|;
     string message;
     json jiraServerErrorLog;
     error cause;
 }
-
 
 public struct IssueType {
     string self;
@@ -321,7 +365,6 @@ public struct IssueType {
     string iconUrl;
     boolean subtask;
 }
-
 
 public struct ProjectVersion {
     string self;
@@ -335,14 +378,14 @@ public struct ProjectVersion {
     string projectId;
 }
 
-public struct AvatarUrls{
+public struct AvatarUrls {
     string |16x16|;
     string |24x24|;
     string |32x32|;
     string |48x48|;
 }
 
-public struct Avatar{
+public struct Avatar {
     string id;
     boolean isSystemAvatar;
     boolean isSelected;
@@ -352,55 +395,12 @@ public struct Avatar{
 }
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                         Enums                                                      //
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-public enum AuthenticationType {
-    BASIC
-}
-
-
-public enum ActorType {
-    GROUP, USER
-}
-
-public enum AssigneeType {
-    PROJECTLEAD, UNASSIGNED
-}
-
-public enum ProjectRoleType {
-    DEVELOPERS, EXTERNAL_CONSULTANT, OBSERVER, ADMINISTRATORS, USERS, CSAT_ADMINISTRATORS, NOTIFICATIONS
-}
-
-public enum ProjectType {
-    SOFTWARE, BUSINESS
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                   Component                                                        //
+//                                           Project Components                                                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-public struct ProjectComponent {
-    string self;
-    string id;
-    string name;
-    string description;
-    string leadName;
-    string assigneeName;
-    string assigneeType;
-    string realAssigneeName;
-    string realAssigneeType;
-    boolean isAssigneeTypeValid;
-    string project;
-    string projectId;
-}
 
 public struct ProjectComponentSummary {
     string self;
@@ -409,7 +409,7 @@ public struct ProjectComponentSummary {
     string description;
 }
 
-public function <ProjectComponentSummary projectComponentSummary> fetchComponent () (ProjectComponent, JiraConnectorError) {
+public function <ProjectComponentSummary projectComponentSummary> expandComponent () (ProjectComponent, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
         create http:HttpClient(constants:JIRA_API_ENDPOINT, getHttpConfigs());
     }
@@ -455,7 +455,22 @@ public function <ProjectComponentSummary projectComponentSummary> fetchComponent
     }
 }
 
-public function <ProjectComponent projectComponent> getLeadDetails () (User, JiraConnectorError) {
+public struct ProjectComponent {
+    string self;
+    string id;
+    string name;
+    string description;
+    string leadName;
+    string assigneeName;
+    string assigneeType;
+    string realAssigneeName;
+    string realAssigneeType;
+    boolean isAssigneeTypeValid;
+    string project;
+    string projectId;
+}
+
+public function <ProjectComponent projectComponent> getLeadUserDetails () (User, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
         create http:HttpClient(constants:JIRA_API_ENDPOINT, getHttpConfigs());
     }
@@ -487,7 +502,7 @@ public function <ProjectComponent projectComponent> getLeadDetails () (User, Jir
     }
 }
 
-public function <ProjectComponent projectComponent> getAssigneeDetails () (User, JiraConnectorError) {
+public function <ProjectComponent projectComponent> fetAssigneeUserDetails () (User, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
         create http:HttpClient(constants:JIRA_API_ENDPOINT, getHttpConfigs());
     }
@@ -525,17 +540,66 @@ public function <ProjectComponent projectComponent> getAssigneeDetails () (User,
 
 
 
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                         Enums                                                      //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+public enum AuthenticationType {
+    BASIC
+}
+
+public enum ActorType {
+    GROUP, USER
+}
+
+public enum AssigneeType {
+    PROJECTLEAD, UNASSIGNED
+}
+
+public enum ProjectRoleType {
+    DEVELOPERS, EXTERNAL_CONSULTANT, OBSERVER, ADMINISTRATORS, USERS, CSAT_ADMINISTRATORS, NOTIFICATIONS
+}
+
+public enum ProjectType {
+    SOFTWARE, BUSINESS
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function getProjectRoleIdFromEnum (ProjectRoleType |type|) (string) {
-    if (|type| == ProjectRoleType.ADMINISTRATORS) {return constants:ROLE_ID_ADMINISTRATORS;}
-                                                                                           else if (|type| == ProjectRoleType.CSAT_ADMINISTRATORS) {return constants:ROLE_ID_CSAT_DEVELOPERS;}
-                                                                                                                                                                                             else if (|type| == ProjectRoleType.DEVELOPERS) {return constants:ROLE_ID_DEVELOPERS;}
-                                                                                                                                                                                                                                                                                 else if (|type| == ProjectRoleType.EXTERNAL_CONSULTANT) {return constants:ROLE_ID_EXTERNAL_CONSULTANTS;}
-                                                                                                                                                                                                                                                                                                                                                                                        else if (|type| == ProjectRoleType.NOTIFICATIONS) {return constants:ROLE_ID_NOTIFICATIONS;}
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  else if (|type| == ProjectRoleType.OBSERVER) {return constants:ROLE_ID_OBSERVER;}
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  else if (|type| == ProjectRoleType.USERS) {return constants:ROLE_ID_USERS;}
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            else { return "";}
+    if (|type| == ProjectRoleType.ADMINISTRATORS) {
+        return constants:ROLE_ID_ADMINISTRATORS;
+    }
+    else if (|type| == ProjectRoleType.CSAT_ADMINISTRATORS) {
+        return constants:ROLE_ID_CSAT_DEVELOPERS;
+    }
+    else if (|type| == ProjectRoleType.DEVELOPERS) {
+        return constants:ROLE_ID_DEVELOPERS;
+    }
+    else if (|type| == ProjectRoleType.EXTERNAL_CONSULTANT) {
+        return constants:ROLE_ID_EXTERNAL_CONSULTANTS;
+    }
+    else if (|type| == ProjectRoleType.NOTIFICATIONS) {
+        return constants:ROLE_ID_NOTIFICATIONS;
+    }
+    else if (|type| == ProjectRoleType.OBSERVER) {
+        return constants:ROLE_ID_OBSERVER;
+    }
+    else if (|type| == ProjectRoleType.USERS) {
+        return constants:ROLE_ID_USERS;
+    }
+    else {
+        return "";
+    }
 }
 
 function getProjectTypeFromEnum (ProjectType projectType) (string) {
