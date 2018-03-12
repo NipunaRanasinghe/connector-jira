@@ -23,6 +23,7 @@ import src.wso2.jira.utils.constants;
 
 
 @Description {value:"Jira client connector"}
+@Param {value:""}
 public connector JiraConnector (AuthenticationType authType) {
 
     //creates HttpClient Endpoint

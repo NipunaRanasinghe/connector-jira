@@ -120,13 +120,14 @@ public function <Project project> addActorToRole (ProjectRoleType projectRoleTyp
     json jsonResponse;
 
     constructAuthHeader(AuthenticationType.BASIC, request);
-
     if (actor.|type| == ActorType.USER) {
-        jsonPayload["user"] = [actor.name];
+        jsonPayload = {};
+        jsonPayload.user = [actor.name];
     }
 
     else if (actor.|type| == ActorType.GROUP) {
-        jsonPayload["group"] = [actor.name];
+        jsonPayload = {};
+        jsonPayload.group = [actor.name];
     }
 
     else {
@@ -241,7 +242,7 @@ public function <Project project> getAllStatuses () (ProjectStatus[], JiraConnec
 }
 
 @Description {value:"Updates the type of a project."}
-public function <Project project> updateProjectType (ProjectType newProjectType) (boolean, JiraConnectorError) {
+public function <Project project> changeProjectType (ProjectType newProjectType) (boolean, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
         create http:HttpClient(constants:JIRA_API_ENDPOINT, getHttpConfigs());
     }

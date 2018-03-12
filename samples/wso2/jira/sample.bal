@@ -1,7 +1,7 @@
 package samples.wso2.jira;
 import ballerina.io;
 import src.wso2.jira;
-import ballerina.log;
+
 
 
 public function main (string[] args) {
@@ -28,18 +28,19 @@ public function main (string[] args) {
     //io:println(e);
     //**************************************************************************************************************
     //Gets descriptions of all the existing jira projects
+    io:println("\n\n");
     io:println("ACTION: getAllProjectSummaries()");
     var projects, e = jiraConnector.getAllProjectSummaries();
     io:println(projects);
     io:println(e);
 
-    
+
     //**************************************************************************************************************
     //Creates new a project named "Test Project - Production Support"
 
     jira:NewProject newProject =
     {
-        key:"TEST-PROJECT",
+        key:"TESTPROJECT",
         name:"Test Project - Production Support",
         projectTypeKey:"software",
         projectTemplateKey:"com.pyxis.greenhopper.jira:basic-software-development-template",
@@ -53,7 +54,7 @@ public function main (string[] args) {
         notificationScheme:10086,
         categoryId:10000
     };
-
+    io:println("\n\n");
     io:println("ACTION: createNewProject()");
     result, e = jiraConnector.createNewProject(newProject);
     io:println(result);
@@ -68,32 +69,35 @@ public function main (string[] args) {
         projectTypeKey:"business"
 
     };
-
+    io:println("\n\n");
     io:println("ACTION: updateProject()");
-    result, e = jiraConnector.updateProject("TEST-PROJECT",projectUpdate);
+    result, e = jiraConnector.updateProject("TESTPROJECT",projectUpdate);
     io:println(result);
     io:println(e);
 
 
     //**************************************************************************************************************
     //Deletes an existing project from jira
+    io:println("\n\n");
     io:println("ACTION: deleteProject()");
-    result, e = jiraConnector.deleteProject("TEST-PROJECT");
+    result, e = jiraConnector.deleteProject("TESTPROJECT");
     io:println(result);
     io:println(e);
 
 
     //**************************************************************************************************************
     //Fetches jira Project details using project id (or project key)
+    io:println("\n\n");
     io:println("ACTION: getProject()");
-    var project, e = jiraConnector.getProject("10017");
+    var project, e = jiraConnector.getProject("10314");
     io:println(project);
     io:println(e);
 
 
     //**************************************************************************************************************
     //Get jira user details of project lead
-    io:println("BIND FUNCTION: getProjectLeadUserDetails()");
+    io:println("\n\n");
+    io:println("BIND FUNCTION: project.getProjectLeadUserDetails()");
     var lead, e = project.getProjectLeadUserDetails();
     io:println(lead);
     io:println(e);
@@ -101,7 +105,8 @@ public function main (string[] args) {
 
     //**************************************************************************************************************
     //View Current Developers assigned to the project.
-    io:println("BIND FUNCTION: getProjectLeadUserDetails()");
+    io:println("\n\n");
+    io:println("BIND FUNCTION: project.getRole()");
     var developers, e = project.getRole(jira:ProjectRoleType.DEVELOPERS);
     io:println(developers);
     io:println(e);
@@ -109,6 +114,8 @@ public function main (string[] args) {
 
     //**************************************************************************************************************
     //Add new group(actor) "support.client.AAALIFEDEV.user" to the the current developers role.
+    io:println("\n\n");
+    io:println("BIND FUNCTION: project.addActorToRole()");
     jira:NewActor newActor = {name:"support.client.AAALIFEDEV.user", |type|:jira:ActorType.GROUP};
     result, e = project.addActorToRole(jira:ProjectRoleType.EXTERNAL_CONSULTANT, newActor);
     io:println(result);
@@ -117,6 +124,8 @@ public function main (string[] args) {
 
     //**************************************************************************************************************
     //Remove group "support.client.AAALIFEDEV.user" from the the current developers role.
+    io:println("\n\n");
+    io:println("BIND FUNCTION: project.removeActorFromRole()");
     result, e = project.removeActorFromRole(jira:ProjectRoleType.DEVELOPERS, "support.client.AAALIFEDEV.user",
                                             jira:ActorType.GROUP);
     io:println(result);
@@ -125,6 +134,8 @@ public function main (string[] args) {
 
     //**************************************************************************************************************
     //Gets all issue types with valid status values for a project
+    io:println("\n\n");
+    io:println("BIND FUNCTION: project.getAllStatuses()");
     var statuses, e = project.getAllStatuses();
     io:println(statuses);
     io:println(e);
@@ -132,13 +143,17 @@ public function main (string[] args) {
 
     //**************************************************************************************************************
     //Updates the type of the project ("business" or "software")
-    result, e = project.updateProjectType(jira:ProjectType.SOFTWARE);
+    io:println("\n\n");
+    io:println("BIND FUNCTION: project.changeProjectType()");
+    result, e = project.changeProjectType(jira:ProjectType.SOFTWARE);
     io:println(result);
     io:println(e);
 
 
     //**************************************************************************************************************
     //get full details of a selected project component
+    io:println("\n\n");
+    io:println("BIND FUNCTION: componentSummary.expandComponent()");
     var component, e = project.components[0].expandComponent();
     io:println(component);
     io:println(e);
@@ -146,6 +161,8 @@ public function main (string[] args) {
 
     //**************************************************************************************************************
     //expand jira user details of the lead
+    io:println("\n\n");
+    io:println("BIND FUNCTION: component.getLeadUserDetails()");
     var user, e = component.getLeadUserDetails();
     io:println(user);
     io:println(e);
@@ -156,6 +173,7 @@ public function main (string[] args) {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //                                        Samples - Jira Project Category                                         //
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
     //var pointer, e =  jiraConnector.getProjectStatuses("10314");
     //io:println(pointer[0]);
