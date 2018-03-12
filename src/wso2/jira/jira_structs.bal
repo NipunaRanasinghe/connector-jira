@@ -318,7 +318,7 @@ public struct NewProjectCategory {
     string description;
 }
 
-public struct SetProject {
+public struct ProjectUpdate {
     string key;
     string name;
     string projectTypeKey;

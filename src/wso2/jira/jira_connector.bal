@@ -134,7 +134,7 @@ public connector JiraConnector (AuthenticationType authType) {
 
     }
 
-    action updateProject (string projectIdOrKey, SetProject setProject) (boolean, JiraConnectorError) {
+    action updateProject (string projectIdOrKey, ProjectUpdate update) (boolean, JiraConnectorError) {
         http:OutRequest request = {};
         http:InResponse response = {};
         JiraConnectorError e;
@@ -144,7 +144,7 @@ public connector JiraConnector (AuthenticationType authType) {
         constructAuthHeader(authType, request);
 
 
-        jsonPayload, err = <json>setProject;
+        jsonPayload, err = <json>update;
         if (err != null) {
             e = <JiraConnectorError, toConnectorError()>err;
             return false, e;
@@ -162,6 +162,29 @@ public connector JiraConnector (AuthenticationType authType) {
 
         else {
             return true, e;
+        }
+
+    }
+
+    action deleteProject (string projectIdOrKey) (boolean, JiraConnectorError) {
+        http:OutRequest request = {};
+        http:InResponse response = {};
+        Project project;
+        JiraConnectorError e;
+        error err;
+
+        json jsonResponse;
+        constructAuthHeader(authType, request);
+
+        response, httpError = jiraEndpoint.delete("/project/" + projectIdOrKey, request);
+        jsonResponse, e = validateResponse(response, httpError);
+
+        if (e != null) {
+            return false, e;
+        }
+
+        else {
+            return true,e;
         }
 
     }

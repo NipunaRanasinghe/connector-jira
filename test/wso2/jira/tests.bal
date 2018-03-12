@@ -13,12 +13,3 @@ public function main (string[] args)  {
 
 
 
-
-public struct SampleStruct {
-    string name;
-    State state;
-}
-
-public enum State{
-    OPEN,CLOSED
-}
