@@ -14,12 +14,12 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
+//
 
 package src.wso2.jira;
 import ballerina.net.http;
-import ballerina.io;
 import src.wso2.jira.utils.constants;
+
 
 
 @Description {value:"Jira client connector"}
@@ -169,10 +169,7 @@ public connector JiraConnector (AuthenticationType authType) {
     action deleteProject (string projectIdOrKey) (boolean, JiraConnectorError) {
         http:OutRequest request = {};
         http:InResponse response = {};
-        Project project;
         JiraConnectorError e;
-        error err;
-
         json jsonResponse;
         constructAuthHeader(authType, request);
 
@@ -395,84 +392,6 @@ public connector JiraConnector (AuthenticationType authType) {
 
 
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                  Functions                                                        //
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-@Description {value:"Add authoriaztion header to the request"}
-@Param {value:"authType: Authentication type preferred by the user"}
-@Param {value:"request: The http request object which is needed to be constructed"}
-function constructAuthHeader (AuthenticationType authType, http:OutRequest request) {
-
-    if (authType == AuthenticationType.BASIC) {
-
-        request.addHeader("Authorization", "Basic YXNoYW5Ad3NvMi5jb206YXNoYW4xMjM");
-    }
-}
-
-@Description {value:"Checks whether the http response contains any errors "}
-@Param {value:"request: The http response object"}
-@Param {value:"httpError: http response error object"}
-function validateResponse (http:InResponse response, http:HttpConnectorError httpError) (json, JiraConnectorError) {
-
-    JiraConnectorError e = {|type|:null, message:"", cause:null};
-
-    if (httpError != null) {
-        e.|type| = "HTTP Error";
-        e.message = httpError.message;
-        e.cause = httpError.cause;
-        return null, e;
-    }
-    else if (response.statusCode != constants:STATUS_CODE_OK && response.statusCode != constants:STATUS_CODE_CREATED
-             && response.statusCode != constants:STATUS_CODE_NO_CONTENT) {
-        json res;
-        io:println(response);
-        e.|type| = "Server Error";
-        e.message = response.reasonPhrase;
-        e.message = "status " + <string>response.statusCode + ": " + e.message;
-        try {
-            res = response.getJsonPayload();
-            e.jiraServerErrorLog = res;
-        }
-        catch (error err) {
-            io:println(err.message);
-        }
-        return null, e;
-
-    }
-    else {
-        try {
-            json jsonResponse = response.getJsonPayload();
-            io:println(jsonResponse);
-            return jsonResponse, null;
-        }
-        catch (error err) {
-            io:println(err.message);
-        }
-        return null, null;
-
-
-    }
-
-}
-
-function getHttpConfigs () (http:Options) {
-
-    http:Options option = {
-                              ssl:{
-                                      trustStoreFile:"${ballerina.home}/bre/security/ballerinaTruststore.p12",
-                                      trustStorePassword:"ballerina"
-                                  },
-                              followRedirects:{},
-                              chunking:"never"
-                          };
-    return option;
-}
-
-
-
-transformer <error source, JiraConnectorError target> toConnectorError() {
-    target = source != null ? {message:source.message, cause:source.cause} : null;
-}
 
 
 
