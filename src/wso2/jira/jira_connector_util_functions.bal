@@ -20,18 +20,18 @@ package src.wso2.jira;
 import ballerina.net.http;
 import ballerina.log;
 import src.wso2.jira.utils.constants;
+import ballerina.config;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                  Functions                                                        //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 @Description {value:"Add authoriaztion header to the request"}
 @Param {value:"authType: Authentication type preferred by the user"}
-@Param {value:"request: The http request object which is needed to be constructed"}
-public function constructAuthHeader (AuthenticationType authType, http:OutRequest request) {
+@Param {value:"request: The http out request object"}
+public function constructAuthHeader (http:OutRequest request) {
 
-    if (authType == AuthenticationType.BASIC) {
-
-        request.addHeader("Authorization", "Basic YXNoYW5Ad3NvMi5jb206YXNoYW4xMjM");
+    if (config:getGlobalValue("authentication_type")=="BASIC") {
+        request.addHeader("Authorization", "Basic "+config:getGlobalValue("base64_encoded_string"));
     }
 }
 
@@ -58,7 +58,7 @@ public function validateResponse (http:InResponse response, http:HttpConnectorEr
             e.jiraServerErrorLog = res;
         }
         catch (error err) {
-            log:printError(err.message);
+            //log:printError(err.message);
         }
         return null, e;
 
@@ -70,7 +70,7 @@ public function validateResponse (http:InResponse response, http:HttpConnectorEr
             return jsonResponse, null;
         }
         catch (error err) {
-            log:printError(err.message);
+            //log:printError(err.message);
         }
         return null, null;
 

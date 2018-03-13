@@ -24,13 +24,11 @@ import src.wso2.jira.utils.constants;
 
 
 @Description {value:"Jira client connector"}
-@Param {value:"username: Jira account username"}
-@Param {value:"password: Jira user account password"}
-public connector JiraConnector (AuthenticationType authType) {
+public connector JiraConnector () {
 
     //creates HttpClient Endpoint
     endpoint<http:HttpClient> jiraEndpoint {
-        create http:HttpClient(constants:JIRA_API_ENDPOINT, getHttpConfigs());
+        create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
     }
     http:HttpConnectorError httpError;
 
@@ -48,8 +46,10 @@ public connector JiraConnector (AuthenticationType authType) {
         json jsonResponse;
         json[] jsonResponseArray;
 
-        constructAuthHeader(authType, request);
+        //Populate Authorization Header
+        constructAuthHeader(request);
         response, httpError = jiraEndpoint.get("/project", request);
+        //Evaluate http response for connection error and server errors
         jsonResponse, e = validateResponse(response, httpError);
 
         if (e != null) {
@@ -63,7 +63,7 @@ public connector JiraConnector (AuthenticationType authType) {
             }
             int x = 0;
             foreach (jsonProject in jsonResponseArray) {
-
+                //Checks fields in json object and add missing fields to use json to struct direct conversion
                 jsonProject.leadName = jsonProject.lead == null ? "" :
                                        jsonProject.lead.name == null ? "" : jsonProject.lead.name;
                 jsonProject.issueTypes = jsonProject.issueTypes == null ? [] : jsonProject.issueTypes;
@@ -96,7 +96,7 @@ public connector JiraConnector (AuthenticationType authType) {
         error err;
 
         json jsonResponse;
-        constructAuthHeader(authType, request);
+        constructAuthHeader(request);
 
         response, httpError = jiraEndpoint.get("/project/" + projectIdOrKey, request);
         jsonResponse, e = validateResponse(response, httpError);
@@ -125,7 +125,7 @@ public connector JiraConnector (AuthenticationType authType) {
         error err;
         json jsonResponse;
         json jsonPayload;
-        constructAuthHeader(authType, request);
+        constructAuthHeader( request);
 
         jsonPayload, err = <json>newProject;
         if (err != null) {
@@ -162,7 +162,7 @@ public connector JiraConnector (AuthenticationType authType) {
         error err;
         json jsonResponse;
         json jsonPayload;
-        constructAuthHeader(authType, request);
+        constructAuthHeader(request);
 
         jsonPayload = <json, toJsonProject()>update;
         if (err != null) {
@@ -194,7 +194,7 @@ public connector JiraConnector (AuthenticationType authType) {
         http:InResponse response = {};
         JiraConnectorError e;
         json jsonResponse;
-        constructAuthHeader(authType, request);
+        constructAuthHeader(request);
 
         response, httpError = jiraEndpoint.delete("/project/" + projectIdOrKey, request);
         jsonResponse, e = validateResponse(response, httpError);
@@ -220,7 +220,7 @@ public connector JiraConnector (AuthenticationType authType) {
         error err;
         json jsonResponse;
         json[] jsonResponseArray;
-        constructAuthHeader(authType, request);
+        constructAuthHeader(request);
         response, httpError = jiraEndpoint.get("/projectCategory", request);
         jsonResponse, e = validateResponse(response, httpError);
 
@@ -255,7 +255,7 @@ public connector JiraConnector (AuthenticationType authType) {
         json jsonResponse;
         json jsonPayload;
 
-        constructAuthHeader(authType, request);
+        constructAuthHeader(request);
 
         jsonPayload, err = <json>newCategory;
         if (err != null) {
@@ -287,7 +287,7 @@ public connector JiraConnector (AuthenticationType authType) {
         JiraConnectorError e = null;
         json jsonResponse;
 
-        constructAuthHeader(authType, request);
+        constructAuthHeader(request);
 
         response, httpError = jiraEndpoint.delete("/projectCategory/" + projectCategoryId, request);
         jsonResponse, e = validateResponse(response, httpError);
