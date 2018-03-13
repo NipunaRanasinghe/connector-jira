@@ -74,6 +74,7 @@ public function <Project project> getProjectLeadUserDetails () (User, JiraConnec
 }
 
 @Description {value:"Returns detailed reprensentation of a given project role(ie:Developers,Administrators etc.)"}
+@Param {value:"projectRoleType: Enum which provides the possible project roles for a jira project"}
 @Return {value:"ProjectRole: structure containing the details of the requested role"}
 @Return {value:"JiraConnectorError: Error Object"}
 public function <Project project> getRole (ProjectRoleType projectRoleType) (ProjectRole, JiraConnectorError) {
@@ -111,7 +112,9 @@ public function <Project project> getRole (ProjectRoleType projectRoleType) (Pro
 }
 
 @Description {value:"assign an actor (user or group) to a project role."}
-@Return {value:"ProjectRole: structure containing the details of the requested role"}
+@Param {value:"projectRoleType: Enum which provides the possible project roles for a jira project"}
+@Param {value:"actor: structure which includes the name and type (group or user) of the actor"}
+@Return {value:"Returns true if process was successfull,otherwise returns false"}
 @Return {value:"JiraConnectorError: Error Object"}
 public function <Project project> addActorToRole (ProjectRoleType projectRoleType,
                                                   NewActor actor) (boolean, JiraConnectorError) {
@@ -165,7 +168,11 @@ public function <Project project> addActorToRole (ProjectRoleType projectRoleTyp
 
 }
 
-
+@Description {value:"remove an actor (user or group) from a given project role."}
+@Param {value:"projectRoleype: Enum which provides the possible project roles for a jira project"}
+@Param {value:"actorName: name of the actor which is needed to be removed"}
+@Return {value:"Returns true if process was successfull,otherwise returns false"}
+@Return {value:"JiraConnectorError: Error Object"}
 public function <Project project> removeActorFromRole (ProjectRoleType projectRoleType, string actorName,
                                                        ActorType actorType) (boolean, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
@@ -218,6 +225,8 @@ public function <Project project> removeActorFromRole (ProjectRoleType projectRo
 }
 
 @Description {value:"Gets all issue types with valid status values for a project."}
+@Return {value:"ProjectStatus[]: array of project status structures"}
+@Return {value:"JiraConnectorError: Error Object"}
 public function <Project project> getAllStatuses () (ProjectStatus[], JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
         create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
@@ -267,7 +276,10 @@ public function <Project project> getAllStatuses () (ProjectStatus[], JiraConnec
 
 }
 
-@Description {value:"Updates the type of a project."}
+@Description {value:"Updates the type of a jira project."}
+@Param {value:"newProjectType: Enum which provides the possible project types for a jira project"}
+@Return {value:"Returns true if update was successfull,otherwise returns false"}
+@Return {value:"JiraConnectorError: Error Object"}
 public function <Project project> changeProjectType (ProjectType newProjectType) (boolean, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
         create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
@@ -300,19 +312,8 @@ public function <Project project> changeProjectType (ProjectType newProjectType)
     }
 
 }
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-public struct Authentication {
-    string username;
-    string password;
-    AuthenticationType authenticationType;
-}
-
-public struct BasicAuthBase64 {
-    string token;
-}
 
 public struct ProjectCategory {
     string self;
@@ -452,6 +453,9 @@ public struct ProjectComponentSummary {
     string description;
 }
 
+@Description {value:"fetches detailed entity using a given project component summary"}
+@Return {value:"ProjectComponent: structure which contains a full representation of the project component"}
+@Return {value:"JiraConnectorError: Error Object"}
 public function <ProjectComponentSummary projectComponentSummary> expandComponent () (ProjectComponent, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
         create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
@@ -513,6 +517,9 @@ public struct ProjectComponent {
     string projectId;
 }
 
+@Description {value:"returns jira user details of the project lead"}
+@Return {value:"User: "}
+@Return {value:"JiraConnectorError: Error Object"}
 public function <ProjectComponent projectComponent> getLeadUserDetails () (User, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
         create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
@@ -545,7 +552,7 @@ public function <ProjectComponent projectComponent> getLeadUserDetails () (User,
     }
 }
 
-public function <ProjectComponent projectComponent> fetAssigneeUserDetails () (User, JiraConnectorError) {
+public function <ProjectComponent projectComponent> getAssigneeUserDetails () (User, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
         create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
     }
@@ -579,40 +586,5 @@ public function <ProjectComponent projectComponent> fetAssigneeUserDetails () (U
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-function getProjectRoleIdFromEnum (ProjectRoleType |type|) (string) {
-    if (|type| == ProjectRoleType.ADMINISTRATORS) {
-        return constants:ROLE_ID_ADMINISTRATORS;
-    }
-    else if (|type| == ProjectRoleType.CSAT_ADMINISTRATORS) {
-        return constants:ROLE_ID_CSAT_DEVELOPERS;
-    }
-    else if (|type| == ProjectRoleType.DEVELOPERS) {
-        return constants:ROLE_ID_DEVELOPERS;
-    }
-    else if (|type| == ProjectRoleType.EXTERNAL_CONSULTANT) {
-        return constants:ROLE_ID_EXTERNAL_CONSULTANTS;
-    }
-    else if (|type| == ProjectRoleType.NOTIFICATIONS) {
-        return constants:ROLE_ID_NOTIFICATIONS;
-    }
-    else if (|type| == ProjectRoleType.OBSERVER) {
-        return constants:ROLE_ID_OBSERVER;
-    }
-    else if (|type| == ProjectRoleType.USERS) {
-        return constants:ROLE_ID_USERS;
-    }
-    else {
-        return "";
-    }
-}
-
-function getProjectTypeFromEnum (ProjectType projectType) (string) {
-    return (projectType == ProjectType.SOFTWARE ? "software" : "business");
-}
 
 

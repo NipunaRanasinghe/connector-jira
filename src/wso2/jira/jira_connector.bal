@@ -125,7 +125,7 @@ public connector JiraConnector () {
         error err;
         json jsonResponse;
         json jsonPayload;
-        constructAuthHeader( request);
+        constructAuthHeader(request);
 
         jsonPayload, err = <json>newProject;
         if (err != null) {
@@ -278,7 +278,7 @@ public connector JiraConnector () {
     }
 
     @Description {value:"Delete a project category."}
-    @Return {value:"projectCategoryId: Jira id of the project category" }
+    @Return {value:"projectCategoryId: Jira id of the project category"}
     @Return {value:"Returns true if the project category was deleted successfully, otherwise returns false"}
     @Return {value:"JiraConnectorError: Error Object"}
     action deleteProjectCategory (string projectCategoryId) (boolean, JiraConnectorError) {

@@ -187,30 +187,13 @@ public function main (string[] args) {
     io:println("ACTION: createNewProjectCategory()");
     jira:NewProjectCategory newCategory = {name:"test-new category",description:"newCategory"};
     result, e =  jiraConnector.createNewProjectCategory(newCategory);
-    io:println(projectCategory);
+    io:println(result);
     io:println(e);
 
 
-    var pointer, e =  jiraConnector.deleteProjectCategory("10571");
-    io:println(pointer);
-    io:println(e);
-
-
-
-
-
-    var pointer2, e =  project.updateProjectType(jira:ProjectType.SOFTWARE);
-    io:println(pointer2);
-    io:println(e);
-
-
-    var pointer2, e = project.components[0].fetchComponent();
-    io:println(pointer2);
-    io:println(e);
-
-    var pointer3, e = pointer2.getLeadDetails();
-    io:println(pointer2);
-    io:println(e);
+    //var pointer, e =  jiraConnector.deleteProjectCategory("10571");
+    //io:println(pointer);
+    //io:println(e);
 
 }
 

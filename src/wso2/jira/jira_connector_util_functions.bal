@@ -18,9 +18,9 @@
 
 package src.wso2.jira;
 import ballerina.net.http;
-import ballerina.log;
 import src.wso2.jira.utils.constants;
 import ballerina.config;
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                  Functions                                                        //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -30,8 +30,9 @@ import ballerina.config;
 @Param {value:"request: The http out request object"}
 public function constructAuthHeader (http:OutRequest request) {
 
-    if (config:getGlobalValue("authentication_type")=="BASIC") {
-        request.addHeader("Authorization", "Basic "+config:getGlobalValue("base64_encoded_string"));
+    //read "authentication_type" field from ballerina.conf
+    if (config:getGlobalValue("authentication_type") == "BASIC") {
+        request.addHeader("Authorization", "Basic " + config:getGlobalValue("base64_encoded_string"));
     }
 }
 
@@ -41,12 +42,14 @@ public function constructAuthHeader (http:OutRequest request) {
 public function validateResponse (http:InResponse response, http:HttpConnectorError httpError) (json, JiraConnectorError) {
     JiraConnectorError e = {|type|:null, message:"", cause:null};
 
+    //checks for any http errors
     if (httpError != null) {
         e.|type| = "HTTP Error";
         e.message = httpError.message;
         e.cause = httpError.cause;
         return null, e;
     }
+        //checks for invalid server responses
     else if (response.statusCode != constants:STATUS_CODE_OK && response.statusCode != constants:STATUS_CODE_CREATED
              && response.statusCode != constants:STATUS_CODE_NO_CONTENT) {
         json res;
@@ -58,23 +61,18 @@ public function validateResponse (http:InResponse response, http:HttpConnectorEr
             e.jiraServerErrorLog = res;
         }
         catch (error err) {
-            //log:printError(err.message);
+            return null, e;
         }
-        return null, e;
-
     }
+    //if there is no any http or server error
     else {
         try {
             json jsonResponse = response.getJsonPayload();
-
             return jsonResponse, null;
         }
         catch (error err) {
-            //log:printError(err.message);
+            return null, null;
         }
-        return null, null;
-
-
     }
 
 }
@@ -83,8 +81,8 @@ public function getHttpConfigs () (http:Options) {
 
     http:Options option = {
                               ssl:{
-                                      trustStoreFile:"${ballerina.home}/bre/security/ballerinaTruststore.p12",
-                                      trustStorePassword:"ballerina"
+                                      trustStoreFile:"",
+                                      trustStorePassword:""
                                   },
                               followRedirects:{},
                               chunking:"never"
@@ -93,12 +91,48 @@ public function getHttpConfigs () (http:Options) {
 }
 
 
+function getProjectRoleIdFromEnum (ProjectRoleType |type|) (string) {
+    if (|type| == ProjectRoleType.ADMINISTRATORS) {
+        return constants:ROLE_ID_ADMINISTRATORS;
+    }
+    else if (|type| == ProjectRoleType.CSAT_ADMINISTRATORS) {
+        return constants:ROLE_ID_CSAT_DEVELOPERS;
+    }
+    else if (|type| == ProjectRoleType.DEVELOPERS) {
+        return constants:ROLE_ID_DEVELOPERS;
+    }
+    else if (|type| == ProjectRoleType.EXTERNAL_CONSULTANT) {
+        return constants:ROLE_ID_EXTERNAL_CONSULTANTS;
+    }
+    else if (|type| == ProjectRoleType.NOTIFICATIONS) {
+        return constants:ROLE_ID_NOTIFICATIONS;
+    }
+    else if (|type| == ProjectRoleType.OBSERVER) {
+        return constants:ROLE_ID_OBSERVER;
+    }
+    else if (|type| == ProjectRoleType.USERS) {
+        return constants:ROLE_ID_USERS;
+    }
+    else {
+        return "";
+    }
+}
+
+function getProjectTypeFromEnum (ProjectType projectType) (string) {
+    return (projectType == ProjectType.SOFTWARE ? "software" : "business");
+}
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                  Transformers                                                     //
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 transformer <error source, JiraConnectorError target> toConnectorError() {
     target = source != null ? {message:source.message, cause:source.cause} : null;
 }
-
-
 
 transformer <ProjectUpdate source, json target> toJsonProject() {
     target.key = source.key != "" ? (json)source.key : null;
@@ -108,10 +142,10 @@ transformer <ProjectUpdate source, json target> toJsonProject() {
     target.description = source.description != "" ? (json)source.description : null;
     target.lead = source.lead != "" ? (json)source.lead : null;
     target.url = source.lead != "" ? (json)source.url : null;
-    target.assigneeType = source.assigneeType!=""?(json)source.assigneeType:null;
-    target.avatarId = source.avatarId!=0?(json)source.avatarId:null;
-    target.issueSecurityScheme = source.issueSecurityScheme!=0?(json)source.issueSecurityScheme:null;
-    target.permissionScheme = source.permissionScheme!=0?(json)source.permissionScheme:null;
-    target.notificationScheme = source.notificationScheme!=0?(json)source.notificationScheme:null;
-    target.categoryId = source.categoryId!=0?(json)source.categoryId:null;
+    target.assigneeType = source.assigneeType != "" ? (json)source.assigneeType : null;
+    target.avatarId = source.avatarId != 0 ? (json)source.avatarId : null;
+    target.issueSecurityScheme = source.issueSecurityScheme != 0 ? (json)source.issueSecurityScheme : null;
+    target.permissionScheme = source.permissionScheme != 0 ? (json)source.permissionScheme : null;
+    target.notificationScheme = source.notificationScheme != 0 ? (json)source.notificationScheme : null;
+    target.categoryId = source.categoryId != 0 ? (json)source.categoryId : null;
 }
