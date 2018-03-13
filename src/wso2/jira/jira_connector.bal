@@ -19,7 +19,6 @@
 package src.wso2.jira;
 import ballerina.net.http;
 import src.wso2.jira.utils.constants;
-
 //global variables to provide authentication in bind functions
 
 

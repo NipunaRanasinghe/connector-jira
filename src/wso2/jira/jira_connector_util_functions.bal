@@ -40,6 +40,7 @@ public function constructAuthHeader (http:OutRequest request) {
 @Param {value:"request: The http response object"}
 @Param {value:"httpError: http response error object"}
 public function validateResponse (http:InResponse response, http:HttpConnectorError httpError) (json, JiraConnectorError) {
+
     JiraConnectorError e = {|type|:null, message:"", cause:null};
 
     //checks for any http errors
@@ -63,8 +64,9 @@ public function validateResponse (http:InResponse response, http:HttpConnectorEr
         catch (error err) {
             return null, e;
         }
+        return null, e;
     }
-    //if there is no any http or server error
+        //if there is no any http or server error
     else {
         try {
             json jsonResponse = response.getJsonPayload();
@@ -73,8 +75,8 @@ public function validateResponse (http:InResponse response, http:HttpConnectorEr
         catch (error err) {
             return null, null;
         }
+        return null, null;
     }
-
 }
 
 public function getHttpConfigs () (http:Options) {
@@ -89,7 +91,6 @@ public function getHttpConfigs () (http:Options) {
                           };
     return option;
 }
-
 
 function getProjectRoleIdFromEnum (ProjectRoleType |type|) (string) {
     if (|type| == ProjectRoleType.ADMINISTRATORS) {
@@ -125,9 +126,9 @@ function getProjectTypeFromEnum (ProjectType projectType) (string) {
 
 
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                  Transformers                                                     //
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                  Transformers                                                      //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 transformer <error source, JiraConnectorError target> toConnectorError() {

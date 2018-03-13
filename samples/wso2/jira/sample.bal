@@ -11,21 +11,15 @@ public function main (string[] args) {
         create jira:JiraConnector();
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //                                         Samples - Jira Project                                                 //
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     jira:JiraConnectorError e;
     boolean result;
 
 
-    //var role,e = jiraConnector.getProjectRole("10314",constants:ROLE_ID_DEVELOPERS);
-    //io:println(role.description);
-    //io:println(e);
-    //
-    //var project, e =  jiraConnector.getProjectSummary("10314");
-    //io:println(project);
-    //io:println(e);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //                                         Samples - Jira Project                                                 //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
     //**************************************************************************************************************
     //Gets descriptions of all the existing jira projects
     io:println("\n\n");
@@ -106,8 +100,8 @@ public function main (string[] args) {
     //**************************************************************************************************************
     //View Current Developers assigned to the project.
     io:println("\n\n");
-    io:println("BIND FUNCTION: project.getRole()");
-    var developers, e = project.getRole(jira:ProjectRoleType.DEVELOPERS);
+    io:println("BIND FUNCTION: project.getRoleDetails()");
+    var developers, e = project.getRoleDetails(jira:ProjectRoleType.DEVELOPERS);
     io:println(developers);
     io:println(e);
 
@@ -135,8 +129,8 @@ public function main (string[] args) {
     //**************************************************************************************************************
     //Gets all issue types with valid status values for a project
     io:println("\n\n");
-    io:println("BIND FUNCTION: project.getAllStatuses()");
-    var statuses, e = project.getAllStatuses();
+    io:println("BIND FUNCTION: project.getAllIssueTypeStatuses()");
+    var statuses, e = project.getAllIssueTypeStatuses();
     io:println(statuses);
     io:println(e);
 
@@ -153,8 +147,8 @@ public function main (string[] args) {
     //**************************************************************************************************************
     //get full details of a selected project component
     io:println("\n\n");
-    io:println("BIND FUNCTION: componentSummary.expandComponent()");
-    var component, e = project.components[0].expandComponent();
+    io:println("BIND FUNCTION: componentSummary.getDetails()");
+    var component, e = project.components[0].getAllDetails();
     io:println(component);
     io:println(e);
 
@@ -191,9 +185,9 @@ public function main (string[] args) {
     io:println(e);
 
 
-    //var pointer, e =  jiraConnector.deleteProjectCategory("10571");
-    //io:println(pointer);
-    //io:println(e);
+    var pointer, e =  jiraConnector.deleteProjectCategory("10571");
+    io:println(pointer);
+    io:println(e);
 
 }
 

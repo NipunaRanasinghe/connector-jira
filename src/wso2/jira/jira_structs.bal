@@ -38,6 +38,7 @@ public struct Project {
     ProjectComponentSummary[] components;
     ProjectVersion[] versions;
 }
+
 @Description {value:"Returns jira user details of the project lead"}
 @Return {value:"User: structure containing user details of the project lead "}
 @Return {value:"JiraConnectorError: Error Object"}
@@ -45,7 +46,7 @@ public function <Project project> getProjectLeadUserDetails () (User, JiraConnec
     endpoint<http:HttpClient> jiraClient {
         create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
     }
-    http:HttpConnectorError httpError;
+    http:HttpConnectorError connectionError;
     http:OutRequest request = {};
     http:InResponse response = {};
     JiraConnectorError e;
@@ -59,8 +60,8 @@ public function <Project project> getProjectLeadUserDetails () (User, JiraConnec
     }
 
     constructAuthHeader(request);
-    response, httpError = jiraClient.get("/user?username=" + project.leadName, request);
-    jsonResponse, e = validateResponse(response, httpError);
+    response, connectionError = jiraClient.get("/user?username=" + project.leadName, request);
+    jsonResponse, e = validateResponse(response, connectionError);
 
     if (e != null) {
         return null, e;
@@ -77,11 +78,11 @@ public function <Project project> getProjectLeadUserDetails () (User, JiraConnec
 @Param {value:"projectRoleType: Enum which provides the possible project roles for a jira project"}
 @Return {value:"ProjectRole: structure containing the details of the requested role"}
 @Return {value:"JiraConnectorError: Error Object"}
-public function <Project project> getRole (ProjectRoleType projectRoleType) (ProjectRole, JiraConnectorError) {
+public function <Project project> getRoleDetails (ProjectRoleType projectRoleType) (ProjectRole, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
         create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
     }
-    http:HttpConnectorError httpError;
+    http:HttpConnectorError connectionError;
     http:OutRequest request = {};
     http:InResponse response = {};
     JiraConnectorError e;
@@ -93,9 +94,9 @@ public function <Project project> getRole (ProjectRoleType projectRoleType) (Pro
     }
 
     constructAuthHeader(request);
-    response, httpError = jiraClient.get("/project/" + project.key + "/role/" +
-                                         getProjectRoleIdFromEnum(projectRoleType), request);
-    jsonResponse, e = validateResponse(response, httpError);
+    response, connectionError = jiraClient.get("/project/" + project.key + "/role/" +
+                                               getProjectRoleIdFromEnum(projectRoleType), request);
+    jsonResponse, e = validateResponse(response, connectionError);
 
     if (e != null) {
         return null, e;
@@ -121,7 +122,7 @@ public function <Project project> addActorToRole (ProjectRoleType projectRoleTyp
     endpoint<http:HttpClient> jiraClient {
         create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
     }
-    http:HttpConnectorError httpError;
+    http:HttpConnectorError connectionError;
     http:OutRequest request = {};
     http:InResponse response = {};
     JiraConnectorError e = {message:""};
@@ -154,9 +155,9 @@ public function <Project project> addActorToRole (ProjectRoleType projectRoleTyp
     }
 
     request.setJsonPayload(jsonPayload);
-    response, httpError = jiraClient.post("/project/" + project.key + "/role/" +
-                                          getProjectRoleIdFromEnum(projectRoleType), request);
-    jsonResponse, e = validateResponse(response, httpError);
+    response, connectionError = jiraClient.post("/project/" + project.key + "/role/" +
+                                                getProjectRoleIdFromEnum(projectRoleType), request);
+    jsonResponse, e = validateResponse(response, connectionError);
 
     if (e != null) {
         return false, e;
@@ -178,7 +179,7 @@ public function <Project project> removeActorFromRole (ProjectRoleType projectRo
     endpoint<http:HttpClient> jiraClient {
         create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
     }
-    http:HttpConnectorError httpError;
+    http:HttpConnectorError connectionError;
     http:OutRequest request = {};
     http:InResponse response = {};
     JiraConnectorError e = {message:""};
@@ -212,9 +213,9 @@ public function <Project project> removeActorFromRole (ProjectRoleType projectRo
     }
 
 
-    response, httpError = jiraClient.delete("/project/" + project.key + "/role/" +
-                                            getProjectRoleIdFromEnum(projectRoleType) + queryParam, request);
-    jsonResponse, e = validateResponse(response, httpError);
+    response, connectionError = jiraClient.delete("/project/" + project.key + "/role/" +
+                                                  getProjectRoleIdFromEnum(projectRoleType) + queryParam, request);
+    jsonResponse, e = validateResponse(response, connectionError);
 
     if (e != null) {
         return false, e;
@@ -227,11 +228,11 @@ public function <Project project> removeActorFromRole (ProjectRoleType projectRo
 @Description {value:"Gets all issue types with valid status values for a project."}
 @Return {value:"ProjectStatus[]: array of project status structures"}
 @Return {value:"JiraConnectorError: Error Object"}
-public function <Project project> getAllStatuses () (ProjectStatus[], JiraConnectorError) {
+public function <Project project> getAllIssueTypeStatuses () (ProjectStatus[], JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
         create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
     }
-    http:HttpConnectorError httpError;
+    http:HttpConnectorError connectionError;
     http:OutRequest request = {};
     http:InResponse response = {};
     JiraConnectorError e;
@@ -246,8 +247,8 @@ public function <Project project> getAllStatuses () (ProjectStatus[], JiraConnec
     }
 
     constructAuthHeader(request);
-    response, httpError = jiraClient.get("/project/" + project.key + "/statuses", request);
-    jsonResponse, e = validateResponse(response, httpError);
+    response, connectionError = jiraClient.get("/project/" + project.key + "/statuses", request);
+    jsonResponse, e = validateResponse(response, connectionError);
 
     if (e != null) {
         return null, e;
@@ -284,7 +285,7 @@ public function <Project project> changeProjectType (ProjectType newProjectType)
     endpoint<http:HttpClient> jiraClient {
         create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
     }
-    http:HttpConnectorError httpError;
+    http:HttpConnectorError connectionError;
     http:OutRequest request = {};
     http:InResponse response = {};
     JiraConnectorError e;
@@ -301,8 +302,8 @@ public function <Project project> changeProjectType (ProjectType newProjectType)
 
     constructAuthHeader(request);
 
-    response, httpError = jiraClient.put("/project/" + project.key + "/type/" + getProjectTypeFromEnum(newProjectType), request);
-    jsonResponse, e = validateResponse(response, httpError);
+    response, connectionError = jiraClient.put("/project/" + project.key + "/type/" + getProjectTypeFromEnum(newProjectType), request);
+    jsonResponse, e = validateResponse(response, connectionError);
 
     if (e != null) {
         return false, e;
@@ -397,13 +398,6 @@ public struct NewProject {
     int categoryId;
 }
 
-public struct JiraConnectorError {
-    string |type|;
-    string message;
-    json jiraServerErrorLog;
-    error cause;
-}
-
 public struct IssueType {
     string self;
     string id;
@@ -441,6 +435,12 @@ public struct Avatar {
     boolean selected;
 }
 
+public struct JiraConnectorError {
+    string |type|;
+    string message;
+    json jiraServerErrorLog;
+    error cause;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                           Project Components                                                       //
@@ -456,11 +456,11 @@ public struct ProjectComponentSummary {
 @Description {value:"fetches detailed entity using a given project component summary"}
 @Return {value:"ProjectComponent: structure which contains a full representation of the project component"}
 @Return {value:"JiraConnectorError: Error Object"}
-public function <ProjectComponentSummary projectComponentSummary> expandComponent () (ProjectComponent, JiraConnectorError) {
+public function <ProjectComponentSummary projectComponentSummary> getDetails () (ProjectComponent, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
         create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
     }
-    http:HttpConnectorError httpError;
+    http:HttpConnectorError connectionError;
 
     http:OutRequest request = {};
     http:InResponse response = {};
@@ -475,8 +475,8 @@ public function <ProjectComponentSummary projectComponentSummary> expandComponen
     }
 
     constructAuthHeader(request);
-    response, httpError = jiraClient.get("/component/" + projectComponentSummary.id, request);
-    jsonResponse, e = validateResponse(response, httpError);
+    response, connectionError = jiraClient.get("/component/" + projectComponentSummary.id, request);
+    jsonResponse, e = validateResponse(response, connectionError);
 
     if (e != null) {
         return null, e;
@@ -524,7 +524,7 @@ public function <ProjectComponent projectComponent> getLeadUserDetails () (User,
     endpoint<http:HttpClient> jiraClient {
         create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
     }
-    http:HttpConnectorError httpError;
+    http:HttpConnectorError connectionError;
 
     http:OutRequest request = {};
     http:InResponse response = {};
@@ -538,8 +538,8 @@ public function <ProjectComponent projectComponent> getLeadUserDetails () (User,
     }
 
     constructAuthHeader(request);
-    response, httpError = jiraClient.get("/user?username=" + projectComponent.leadName, request);
-    jsonResponse, e = validateResponse(response, httpError);
+    response, connectionError = jiraClient.get("/user?username=" + projectComponent.leadName, request);
+    jsonResponse, e = validateResponse(response, connectionError);
 
     if (e != null) {
         return null, e;
@@ -556,7 +556,7 @@ public function <ProjectComponent projectComponent> getAssigneeUserDetails () (U
     endpoint<http:HttpClient> jiraClient {
         create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
     }
-    http:HttpConnectorError httpError;
+    http:HttpConnectorError connectionError;
 
     http:OutRequest request = {};
     http:InResponse response = {};
@@ -570,8 +570,8 @@ public function <ProjectComponent projectComponent> getAssigneeUserDetails () (U
     }
 
     constructAuthHeader(request);
-    response, httpError = jiraClient.get("/user?username=" + projectComponent.assigneeName, request);
-    jsonResponse, e = validateResponse(response, httpError);
+    response, connectionError = jiraClient.get("/user?username=" + projectComponent.assigneeName, request);
+    jsonResponse, e = validateResponse(response, connectionError);
 
     if (e != null) {
         return null, e;
