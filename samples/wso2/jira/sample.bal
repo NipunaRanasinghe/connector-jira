@@ -20,13 +20,13 @@ public function main (string[] args) {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-    //**************************************************************************************************************
-    //Gets descriptions of all the existing jira projects
-    io:println("\n\n");
-    io:println("ACTION: getAllProjectSummaries()");
-    var projects, e = jiraConnector.getAllProjectSummaries();
-    io:println(projects);
-    io:println(e);
+    ////**************************************************************************************************************
+    ////Gets descriptions of all the existing jira projects
+    //io:println("\n\n");
+    //io:println("ACTION: getAllProjectSummaries()");
+    //var projects, e = jiraConnector.getAllProjectSummaries();
+    //io:println(projects);
+    //io:println(e);
 
 
     //**************************************************************************************************************
@@ -105,23 +105,35 @@ public function main (string[] args) {
     io:println(developers);
     io:println(e);
 
-
     //**************************************************************************************************************
-    //Add new group(actor) "support.client.AAALIFEDEV.user" to the the current developers role.
+    //Add user "pasan@wso2.com" to "developers" role.
     io:println("\n\n");
-    io:println("BIND FUNCTION: project.addActorToRole()");
-    jira:NewActor newActor = {name:"support.client.AAALIFEDEV.user", |type|:jira:ActorType.GROUP};
-    result, e = project.addActorToRole(jira:ProjectRoleType.EXTERNAL_CONSULTANT, newActor);
+    io:println("BIND FUNCTION: project.addUserToRole()");
+    result, e = project.addUserToRole(jira:ProjectRoleType.EXTERNAL_CONSULTANT,"pasan@wso2.com");
     io:println(result);
     io:println(e);
 
+    //**************************************************************************************************************
+    //Add group "support.client.AAALIFEDEV.user" to "developers" role.
+    io:println("\n\n");
+    io:println("BIND FUNCTION: project.addGroupToRole()");
+    result, e = project.addGroupToRole(jira:ProjectRoleType.EXTERNAL_CONSULTANT, "support.client.AAALIFEDEV.user");
+    io:println(result);
+    io:println(e);
 
     //**************************************************************************************************************
-    //Remove group "support.client.AAALIFEDEV.user" from the the current developers role.
+    //Remove group "pasan@wso2.com" from "developers" role.
     io:println("\n\n");
-    io:println("BIND FUNCTION: project.removeActorFromRole()");
-    result, e = project.removeActorFromRole(jira:ProjectRoleType.DEVELOPERS, "support.client.AAALIFEDEV.user",
-                                            jira:ActorType.GROUP);
+    io:println("BIND FUNCTION: project.removeUserFromRole()");
+    result, e = project.removeUserFromRole(jira:ProjectRoleType.DEVELOPERS, "pasan@wso2.com");
+    io:println(result);
+    io:println(e);
+
+    //**************************************************************************************************************
+    //Remove group "support.client.AAALIFEDEV.user" from "developers" role.
+    io:println("\n\n");
+    io:println("BIND FUNCTION: project.removeGroupFromRole()");
+    result, e = project.removeGroupFromRole(jira:ProjectRoleType.DEVELOPERS, "support.client.AAALIFEDEV.user");
     io:println(result);
     io:println(e);
 

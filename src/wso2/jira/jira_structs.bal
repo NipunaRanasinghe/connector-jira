@@ -112,13 +112,13 @@ public function <Project project> getRoleDetails (ProjectRoleType projectRoleTyp
     }
 }
 
-@Description {value:"assign an actor (user or group) to a project role."}
+@Description {value:"assign an user to a project role."}
 @Param {value:"projectRoleType: Enum which provides the possible project roles for a jira project"}
-@Param {value:"actor: structure which includes the name and type (group or user) of the actor"}
+@Param {value:"userName: name of the user to be added"}
 @Return {value:"Returns true if process was successfull,otherwise returns false"}
 @Return {value:"JiraConnectorError: Error Object"}
-public function <Project project> addActorToRole (ProjectRoleType projectRoleType,
-                                                  NewActor actor) (boolean, JiraConnectorError) {
+public function <Project project> addUserToRole (ProjectRoleType projectRoleType,
+                                                 string userName) (boolean, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
         create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
     }
@@ -133,27 +133,8 @@ public function <Project project> addActorToRole (ProjectRoleType projectRoleTyp
         e = {message:"Unable to proceed with a null structure: Project", cause:null};
         return false, e;
     }
-    if (actor == null) {
-        e = {message:"Unable to proceed with a null structure: NewActor", cause:null};
-        return false, e;
-    }
 
-    constructAuthHeader(request);
-    if (actor.|type| == ActorType.USER) {
-        jsonPayload = {};
-        jsonPayload.user = [actor.name];
-    }
-
-    else if (actor.|type| == ActorType.GROUP) {
-        jsonPayload = {};
-        jsonPayload.group = [actor.name];
-    }
-
-    else {
-        e.message = "actor type is not specified correctly";
-        return false, e;
-    }
-
+    jsonPayload.user = [userName];
     request.setJsonPayload(jsonPayload);
     response, connectionError = jiraClient.post("/project/" + project.key + "/role/" +
                                                 getProjectRoleIdFromEnum(projectRoleType), request);
@@ -169,13 +150,50 @@ public function <Project project> addActorToRole (ProjectRoleType projectRoleTyp
 
 }
 
-@Description {value:"remove an actor (user or group) from a given project role."}
-@Param {value:"projectRoleype: Enum which provides the possible project roles for a jira project"}
-@Param {value:"actorName: name of the actor which is needed to be removed"}
+@Description {value:"assign a group to a project role."}
+@Param {value:"projectRoleType: Enum which provides the possible project roles for a jira project"}
+@Param {value:"groupName: name of the group to be added"}
 @Return {value:"Returns true if process was successfull,otherwise returns false"}
 @Return {value:"JiraConnectorError: Error Object"}
-public function <Project project> removeActorFromRole (ProjectRoleType projectRoleType, string actorName,
-                                                       ActorType actorType) (boolean, JiraConnectorError) {
+public function <Project project> addGroupToRole (ProjectRoleType projectRoleType,
+                                                  string groupName) (boolean, JiraConnectorError) {
+    endpoint<http:HttpClient> jiraClient {
+        create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
+    }
+    http:HttpConnectorError connectionError;
+    http:OutRequest request = {};
+    http:InResponse response = {};
+    JiraConnectorError e = {message:""};
+    json jsonPayload;
+    json jsonResponse;
+
+    if (project == null) {
+        e = {message:"Unable to proceed with a null structure: Project", cause:null};
+        return false, e;
+    }
+
+    jsonPayload.group = [groupName];
+    request.setJsonPayload(jsonPayload);
+    response, connectionError = jiraClient.post("/project/" + project.key + "/role/" +
+                                                getProjectRoleIdFromEnum(projectRoleType), request);
+    jsonResponse, e = validateResponse(response, connectionError);
+
+    if (e != null) {
+        return false, e;
+    }
+
+    else {
+        return true, null;
+    }
+
+}
+
+@Description {value:"remove an jira user from a given project role."}
+@Param {value:"projectRoleype: Enum which provides the possible project roles for a jira project"}
+@Param {value:"userName: name of the user required to be removed"}
+@Return {value:"Returns true if process was successfull,otherwise returns false"}
+@Return {value:"JiraConnectorError: Error Object"}
+public function <Project project> removeUserFromRole (ProjectRoleType projectRoleType, string actorName) (boolean, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
         create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
     }
@@ -184,7 +202,6 @@ public function <Project project> removeActorFromRole (ProjectRoleType projectRo
     http:InResponse response = {};
     JiraConnectorError e = {message:""};
     json jsonResponse;
-    string queryParam;
 
     if (project == null) {
         e = {message:"Unable to proceed with a null structure: Project", cause:null};
@@ -194,27 +211,49 @@ public function <Project project> removeActorFromRole (ProjectRoleType projectRo
         e = {message:"Unable to proceed with a null structure: ProjectRoleType", cause:null};
         return false, e;
     }
-    if (actorType == null) {
-        e = {message:"Unable to proceed with a null structure: ActorType", cause:null};
+
+    constructAuthHeader(request);
+
+    response, connectionError = jiraClient.delete("/project/" + project.key + "/role/" +
+                                                  getProjectRoleIdFromEnum(projectRoleType) + "?user=" + actorName, request);
+    jsonResponse, e = validateResponse(response, connectionError);
+
+    if (e != null) {
+        return false, e;
+    }
+    else {
+        return true, null;
+    }
+}
+
+@Description {value:"remove an jira group from a given project role."}
+@Param {value:"projectRoleype: Enum which provides the possible project roles for a jira project"}
+@Param {value:"groupName: name of the user required to be removed"}
+@Return {value:"Returns true if process was successfull,otherwise returns false"}
+@Return {value:"JiraConnectorError: Error Object"}
+public function <Project project> removeGroupFromRole (ProjectRoleType projectRoleType, string groupName) (boolean, JiraConnectorError) {
+    endpoint<http:HttpClient> jiraClient {
+        create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
+    }
+    http:HttpConnectorError connectionError;
+    http:OutRequest request = {};
+    http:InResponse response = {};
+    JiraConnectorError e = {message:""};
+    json jsonResponse;
+
+    if (project == null) {
+        e = {message:"Unable to proceed with a null structure: Project", cause:null};
+        return false, e;
+    }
+    else if (projectRoleType == null) {
+        e = {message:"Unable to proceed with a null structure: ProjectRoleType", cause:null};
         return false, e;
     }
 
     constructAuthHeader(request);
 
-    if (actorType == ActorType.USER) {
-        queryParam = "?user=" + actorName;
-    }
-    else if (actorType == ActorType.GROUP) {
-        queryParam = "?group=" + actorName;
-    }
-    else {
-        e.message = "actor type is not specified correctly";
-        return false, e;
-    }
-
-
     response, connectionError = jiraClient.delete("/project/" + project.key + "/role/" +
-                                                  getProjectRoleIdFromEnum(projectRoleType) + queryParam, request);
+                                                  getProjectRoleIdFromEnum(projectRoleType) + "?group=" + groupName, request);
     jsonResponse, e = validateResponse(response, connectionError);
 
     if (e != null) {
