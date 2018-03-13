@@ -105,7 +105,8 @@ public function <Project project> getRole (ProjectRoleType projectRoleType) (Pro
     }
 }
 
-public function <Project project> addActorToRole (ProjectRoleType projectRoleType, NewActor actor) (boolean, JiraConnectorError) {
+public function <Project project> addActorToRole (ProjectRoleType projectRoleType,
+                                                  NewActor actor) (boolean, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
         create http:HttpClient(constants:JIRA_API_ENDPOINT, getHttpConfigs());
     }
@@ -120,7 +121,7 @@ public function <Project project> addActorToRole (ProjectRoleType projectRoleTyp
         e = {message:"Unable to proceed with a null structure: Project", cause:null};
         return false, e;
     }
-    if(actor== null){
+    if (actor == null) {
         e = {message:"Unable to proceed with a null structure: NewActor", cause:null};
         return false, e;
     }
@@ -156,7 +157,8 @@ public function <Project project> addActorToRole (ProjectRoleType projectRoleTyp
 
 }
 
-public function <Project project> removeActorFromRole (ProjectRoleType projectRoleType, string actorName,ActorType actorType) (boolean, JiraConnectorError) {
+public function <Project project> removeActorFromRole (ProjectRoleType projectRoleType, string actorName,
+                                                       ActorType actorType) (boolean, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
         create http:HttpClient(constants:JIRA_API_ENDPOINT, getHttpConfigs());
     }
@@ -171,11 +173,11 @@ public function <Project project> removeActorFromRole (ProjectRoleType projectRo
         e = {message:"Unable to proceed with a null structure: Project", cause:null};
         return false, e;
     }
-    if(projectRoleType == null){
+    if (projectRoleType == null) {
         e = {message:"Unable to proceed with a null structure: ProjectRoleType", cause:null};
         return false, e;
     }
-    if(actorType == null){
+    if (actorType == null) {
         e = {message:"Unable to proceed with a null structure: ActorType", cause:null};
         return false, e;
     }
@@ -183,10 +185,10 @@ public function <Project project> removeActorFromRole (ProjectRoleType projectRo
     constructAuthHeader(AuthenticationType.BASIC, request);
 
     if (actorType == ActorType.USER) {
-        queryParam = "?user="+actorName;
+        queryParam = "?user=" + actorName;
     }
     else if (actorType == ActorType.GROUP) {
-        queryParam = "?group="+actorName;
+        queryParam = "?group=" + actorName;
     }
     else {
         e.message = "actor type is not specified correctly";
@@ -195,7 +197,7 @@ public function <Project project> removeActorFromRole (ProjectRoleType projectRo
 
 
     response, httpError = jiraClient.delete("/project/" + project.key + "/role/" +
-                                          getProjectRoleIdFromEnum(projectRoleType)+queryParam, request);
+                                            getProjectRoleIdFromEnum(projectRoleType) + queryParam, request);
     jsonResponse, e = validateResponse(response, httpError);
 
     if (e != null) {
@@ -267,11 +269,11 @@ public function <Project project> changeProjectType (ProjectType newProjectType)
     JiraConnectorError e;
     json jsonResponse;
 
-    if(project == null){
+    if (project == null) {
         e = {message:"Unable to proceed with a null structure: Project", cause:null};
         return false, e;
     }
-    if(newProjectType == null){
+    if (newProjectType == null) {
         e = {message:"Unable to proceed with a null structure: ProjectType", cause:null};
         return false, e;
     }
@@ -430,12 +432,9 @@ public struct Avatar {
 }
 
 
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                           Project Components                                                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 public struct ProjectComponentSummary {
     string self;
@@ -518,7 +517,7 @@ public function <ProjectComponent projectComponent> getLeadUserDetails () (User,
     json jsonResponse;
 
     if (projectComponent == null) {
-        e = {message:"Unable to proceed with a null structure", cause:null};
+        e = {message:"Unable to proceed with a null structure: ProjectComponent", cause:null};
         return null, e;
     }
 
@@ -550,7 +549,7 @@ public function <ProjectComponent projectComponent> fetAssigneeUserDetails () (U
     json jsonResponse;
 
     if (projectComponent == null) {
-        e = {message:"Unable to proceed with a null structure", cause:null};
+        e = {message:"Unable to proceed with a null structure: ProjectComponent", cause:null};
         return null, e;
     }
 
@@ -569,41 +568,7 @@ public function <ProjectComponent projectComponent> fetAssigneeUserDetails () (U
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                         Enums                                                      //
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-public enum AuthenticationType {
-    BASIC
-}
-
-public enum ActorType {
-    GROUP, USER
-}
-
-public enum AssigneeType {
-    PROJECTLEAD, UNASSIGNED
-}
-
-public enum ProjectRoleType {
-    DEVELOPERS, EXTERNAL_CONSULTANT, OBSERVER, ADMINISTRATORS, USERS, CSAT_ADMINISTRATORS, NOTIFICATIONS
-}
-
-public enum ProjectType {
-    SOFTWARE, BUSINESS
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 

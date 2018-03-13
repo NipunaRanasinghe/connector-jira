@@ -34,7 +34,11 @@ public connector JiraConnector (AuthenticationType authType) {
     }
     http:HttpConnectorError httpError;
 
-
+    @Description {value:"Returns all projects which are visible for the currently logged in user.
+    If no user is logged in, it returns the list of projects that are visible when using anonymous access"}
+    @Return {value:"Project[]: Array of projects for which the user has the BROWSE, ADMINISTER or PROJECT_ADMIN
+    project permission."}
+    @Return {value:"JiraConnectorError: Error Object"}
     action getAllProjectSummaries () (Project[], JiraConnectorError) {
         http:OutRequest request = {};
         http:InResponse response = {};
@@ -79,8 +83,11 @@ public connector JiraConnector (AuthenticationType authType) {
 
     }
 
-    @Description {value:"Get Jira Project information"}
-    @Param {value: "string containing the unique key/id of the project"}
+    @Description {value:"Returns detailed representation of a project."}
+    @Param {value:"projectIdOrKey: unique string which represents the project id or project key of a jira project"}
+    @Return {value:"Project: Contains a full representation of a project, if the project exists,the user has permission
+    to view it and if no any error occured"}
+    @Return {value:"JiraConnectorError: Error Object"}
     action getProject (string projectIdOrKey) (Project, JiraConnectorError) {
         http:OutRequest request = {};
         http:InResponse response = {};
@@ -107,6 +114,10 @@ public connector JiraConnector (AuthenticationType authType) {
 
     }
 
+    @Description {value:"Creates a new project."}
+    @Param {value:"newProject: struct which contains the mandatory fields for new project creation"}
+    @Return {value:"Returns true if the project was created was successfully,otherwise returns false"}
+    @Return {value:"JiraConnectorError: Error Object"}
     action createNewProject (NewProject newProject) (boolean, JiraConnectorError) {
         http:OutRequest request = {};
         http:InResponse response = {};
@@ -138,6 +149,12 @@ public connector JiraConnector (AuthenticationType authType) {
 
     }
 
+    @Description {value:"Updates a project. Only non null values sent in 'ProjectUpdate' structure will
+    be updated in the project. Values available for the assigneeType field are: 'PROJECT_LEAD' and 'UNASSIGNED'."}
+    @Param {value:"projectIdOrKey: unique string which represents the project id or project key of a jira project"}
+    @Param {value:"update: structure containing fields which need to be updated"}
+    @Return {value:"Returns true if project was updated successfully,otherwise return false"}
+    @Return {value:"JiraConnectorError: Error Object"}
     action updateProject (string projectIdOrKey, ProjectUpdate update) (boolean, JiraConnectorError) {
         http:OutRequest request = {};
         http:InResponse response = {};
@@ -147,7 +164,7 @@ public connector JiraConnector (AuthenticationType authType) {
         json jsonPayload;
         constructAuthHeader(authType, request);
 
-        jsonPayload = <json,toJsonProject()>update;
+        jsonPayload = <json, toJsonProject()>update;
         if (err != null) {
             e = <JiraConnectorError, toConnectorError()>err;
             return false, e;
@@ -155,7 +172,7 @@ public connector JiraConnector (AuthenticationType authType) {
 
         request.setJsonPayload(jsonPayload);
 
-        response, httpError = jiraEndpoint.put("/project/"+projectIdOrKey, request);
+        response, httpError = jiraEndpoint.put("/project/" + projectIdOrKey, request);
         jsonResponse, e = validateResponse(response, httpError);
 
         if (e != null) {
@@ -168,6 +185,10 @@ public connector JiraConnector (AuthenticationType authType) {
 
     }
 
+    @Description {value:"Deletes a project."}
+    @Param {value:"projectIdOrKey: unique string which represents the project id or project key of a jira project"}
+    @Return {value:"Returns true if project was deleted successfully,otherwise return false"}
+    @Return {value:"JiraConnectorError: Error Object"}
     action deleteProject (string projectIdOrKey) (boolean, JiraConnectorError) {
         http:OutRequest request = {};
         http:InResponse response = {};
@@ -183,11 +204,14 @@ public connector JiraConnector (AuthenticationType authType) {
         }
 
         else {
-            return true,e;
+            return true, e;
         }
 
     }
 
+    @Description {value:"Returns all existing project categories"}
+    @Return {value:"ProjectCategory[]: Array of structures which contain existing categories"}
+    @Return {value:"JiraConnectorError: Error Object"}
     action getAllProjectCategories () (ProjectCategory[], JiraConnectorError) {
         http:OutRequest request = {};
         http:InResponse response = {};
@@ -217,9 +241,11 @@ public connector JiraConnector (AuthenticationType authType) {
             }
             return projectCategories, e;
         }
-
     }
 
+    @Description {value:"Create a new project category"}
+    @Return {value:"newCategory: struct which contains the mandatory fields for new project category creation "}
+    @Return {value:"JiraConnectorError: Error Object"}
     action createNewProjectCategory (NewProjectCategory newCategory) (boolean, JiraConnectorError) {
 
         http:OutRequest request = {};
@@ -251,6 +277,10 @@ public connector JiraConnector (AuthenticationType authType) {
 
     }
 
+    @Description {value:"Delete a project category."}
+    @Return {value:"projectCategoryId: Jira id of the project category" }
+    @Return {value:"Returns true if the project category was deleted successfully, otherwise returns false"}
+    @Return {value:"JiraConnectorError: Error Object"}
     action deleteProjectCategory (string projectCategoryId) (boolean, JiraConnectorError) {
         http:OutRequest request = {};
         http:InResponse response = {};
@@ -271,7 +301,7 @@ public connector JiraConnector (AuthenticationType authType) {
 
 
     //This Action is replaced by a struct-bound function
-     //@Description {value: "Get the list of roles assigned to the project"}
+    //@Description {value: "Get the list of roles assigned to the project"}
     //@Param {value: "string containing the unique key/id of project"}
     //@Param {value: "string containing the unique id of the project role"}
     //action getProjectRole (string projectIdOrKey, string projectRoleId) (ProjectRole, JiraConnectorError) {
