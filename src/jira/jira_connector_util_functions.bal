@@ -49,10 +49,8 @@ public function getValidatedResponse (http:InResponse response, http:HttpConnect
         e.message = connectionError.message;
         e.cause = connectionError.cause;
         return null, e;
-    }
-        //checks for invalid server responses
-    else if (response.statusCode != STATUS_CODE_OK && response.statusCode != STATUS_CODE_CREATED
-             && response.statusCode != STATUS_CODE_NO_CONTENT) {
+    } else if (response.statusCode != STATUS_CODE_OK && response.statusCode != STATUS_CODE_CREATED
+               && response.statusCode != STATUS_CODE_NO_CONTENT) {//checks for invalid server responses
         json res;
         e.|type| = "Server Error";
         e.message = response.reasonPhrase;
@@ -65,9 +63,7 @@ public function getValidatedResponse (http:InResponse response, http:HttpConnect
             return null, e;
         }
         return null, e;
-    }
-        //if there is no any http or server error
-    else {
+    } else {//if there is no any http or server error
         try {
             json jsonResponse = response.getJsonPayload();
             return jsonResponse, null;
@@ -95,26 +91,19 @@ public function getHttpConfigs () (http:Options) {
 function getProjectRoleIdFromEnum (ProjectRoleType |type|) (string) {
     if (|type| == ProjectRoleType.ADMINISTRATORS) {
         return ROLE_ID_ADMINISTRATORS;
-    }
-    else if (|type| == ProjectRoleType.CSAT_ADMINISTRATORS) {
+    } else if (|type| == ProjectRoleType.CSAT_ADMINISTRATORS) {
         return ROLE_ID_CSAT_DEVELOPERS;
-    }
-    else if (|type| == ProjectRoleType.DEVELOPERS) {
+    } else if (|type| == ProjectRoleType.DEVELOPERS) {
         return ROLE_ID_DEVELOPERS;
-    }
-    else if (|type| == ProjectRoleType.EXTERNAL_CONSULTANT) {
+    } else if (|type| == ProjectRoleType.EXTERNAL_CONSULTANT) {
         return ROLE_ID_EXTERNAL_CONSULTANTS;
-    }
-    else if (|type| == ProjectRoleType.NOTIFICATIONS) {
+    } else if (|type| == ProjectRoleType.NOTIFICATIONS) {
         return ROLE_ID_NOTIFICATIONS;
-    }
-    else if (|type| == ProjectRoleType.OBSERVER) {
+    } else if (|type| == ProjectRoleType.OBSERVER) {
         return ROLE_ID_OBSERVER;
     }
-    else if (|type| == ProjectRoleType.USERS) {
-        return ROLE_ID_USERS;
-    }
-    else {
+    else if (|type| == ProjectRoleType.USERS) {return ROLE_ID_USERS;
+    } else {
         return "";
     }
 }
@@ -135,7 +124,7 @@ transformer <error source, JiraConnectorError target> toConnectorError() {
     target = source != null ? {message:source.message, cause:source.cause} : null;
 }
 
-transformer <ProjectUpdate source, json target> createJsonProjectRequest() {
+transformer <ProjectRequest source, json target> createJsonProjectRequest() {
     target.key = source.key != "" ? (json)source.key : null;
     target.name = source.name != "" ? (json)source.name : null;
     target.projectTypeKey = source.projectTypeKey != "" ? (json)source.projectTypeKey : null;
@@ -159,7 +148,7 @@ transformer <json source, Project target> createProjectSummary() {
     target.description = source.description != null ? source.description.toString() : "";
     target.leadName = source.lead != null ? source.lead.name != null ? source.lead.name.toString() : "" : "";
     target.projectTypeKey = source.projectTypeKey.toString();
-    target.projectCategory = source.projectCategory != null ? <ProjectCategory, createProjectCategory()>source.projectCategory:null;
+    target.projectCategory = source.projectCategory != null ? <ProjectCategory, createProjectCategory()>source.projectCategory : null;
 }
 
 transformer <json source, ProjectCategory target> createProjectCategory() {

@@ -67,11 +67,10 @@ public function <Project project> getProjectLeadUserDetails () (User, JiraConnec
         return null, e;
     }
 
-    else {
-        lead, err = <User>jsonResponse;
-        e = <JiraConnectorError, toConnectorError()>err;
-        return lead, e;
-    }
+    lead, err = <User>jsonResponse;
+    e = <JiraConnectorError, toConnectorError()>err;
+    return lead, e;
+
 }
 
 @Description {value:"Returns detailed reprensentation of a given project role(ie:Developers,Administrators etc.)"}
@@ -102,14 +101,13 @@ public function <Project project> getRoleDetails (ProjectRoleType projectRoleTyp
         return null, e;
     }
 
-    else {
-        var role, err = <ProjectRole>jsonResponse;
-        if (err != null) {
-            e = <JiraConnectorError, toConnectorError()>err;
-            return null, e;
-        }
-        return role, e;
+    var role, err = <ProjectRole>jsonResponse;
+    if (err != null) {
+        e = <JiraConnectorError, toConnectorError()>err;
+        return null, e;
     }
+    return role, e;
+
 }
 
 @Description {value:"assign an user to a project role."}
@@ -144,9 +142,7 @@ public function <Project project> addUserToRole (ProjectRoleType projectRoleType
         return false, e;
     }
 
-    else {
-        return true, null;
-    }
+    return true, null;
 
 }
 
@@ -182,9 +178,8 @@ public function <Project project> addGroupToRole (ProjectRoleType projectRoleTyp
         return false, e;
     }
 
-    else {
-        return true, null;
-    }
+    return true, null;
+
 
 }
 
@@ -221,9 +216,9 @@ public function <Project project> removeUserFromRole (ProjectRoleType projectRol
     if (e != null) {
         return false, e;
     }
-    else {
-        return true, null;
-    }
+
+    return true, null;
+
 }
 
 @Description {value:"removes a given group from a given project role."}
@@ -259,9 +254,9 @@ public function <Project project> removeGroupFromRole (ProjectRoleType projectRo
     if (e != null) {
         return false, e;
     }
-    else {
-        return true, null;
-    }
+
+    return true, null;
+
 }
 
 @Description {value:"Gets all issue types with valid status values for a project."}
@@ -293,26 +288,27 @@ public function <Project project> getAllIssueTypeStatuses () (ProjectStatus[], J
         return null, e;
     }
 
-    else {
-        jsonResponseArray, err = (json[])jsonResponse;
+
+    jsonResponseArray, err = (json[])jsonResponse;
+    if (err != null) {
+        e = <JiraConnectorError, toConnectorError()>err;
+        return null, e;
+    }
+
+    int i = 0;
+    foreach (status in jsonResponseArray) {
+        statusArray[i], err = <ProjectStatus>status;
         if (err != null) {
             e = <JiraConnectorError, toConnectorError()>err;
             return null, e;
         }
-        else {
-            int x = 0;
-            foreach (i in jsonResponseArray) {
-                statusArray[x], err = <ProjectStatus>jsonResponseArray[x];
-                if (err != null) {
-                    e = <JiraConnectorError, toConnectorError()>err;
-                    return null, e;
-                }
-                x = x + 1;
-            }
+        i = i + 1;
 
-            return statusArray, null;
-        }
     }
+
+    return statusArray, null;
+
+
 
 }
 
@@ -347,9 +343,8 @@ public function <Project project> changeProjectType (ProjectType newProjectType)
     if (e != null) {
         return false, e;
     }
-    else {
-        return true, null;
-    }
+
+    return true, null;
 
 }
 
@@ -429,8 +424,8 @@ public struct ProjectComponent {
     string projectId;
 }
 
-@Description {value:"returns jira user details of the project lead"}
-@Return {value:"User: "}
+@Description {value:"returns jira user details of the project component lead"}
+@Return {value:"User: structure containing user details of the lead "}
 @Return {value:"JiraConnectorError: Error Object"}
 public function <ProjectComponent projectComponent> getLeadUserDetails () (User, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
@@ -457,13 +452,15 @@ public function <ProjectComponent projectComponent> getLeadUserDetails () (User,
         return null, e;
     }
 
-    else {
-        var lead, err = <User>jsonResponse;
-        e = <JiraConnectorError, toConnectorError()>err;
-        return lead, e;
-    }
+    var lead, err = <User>jsonResponse;
+    e = <JiraConnectorError, toConnectorError()>err;
+    return lead, e;
+
 }
 
+@Description {value:"returns jira user details of the project component assignee"}
+@Return {value:"User: structure containing user details of the lead "}
+@Return {value:"JiraConnectorError: Error Object"}
 public function <ProjectComponent projectComponent> getAssigneeUserDetails () (User, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
         jiraHttpClient;
@@ -489,11 +486,10 @@ public function <ProjectComponent projectComponent> getAssigneeUserDetails () (U
         return null, e;
     }
 
-    else {
-        var lead, err = <User>jsonResponse;
-        e = <JiraConnectorError, toConnectorError()>err;
-        return lead, e;
-    }
+    var lead, err = <User>jsonResponse;
+    e = <JiraConnectorError, toConnectorError()>err;
+    return lead, e;
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -549,23 +545,7 @@ public struct NewProjectCategory {
     string description;
 }
 
-public struct ProjectUpdate {
-    string key;
-    string name;
-    string projectTypeKey;
-    string projectTemplateKey;
-    string description;
-    string lead;
-    string url;
-    string assigneeType;
-    int avatarId;
-    int issueSecurityScheme;
-    int permissionScheme;
-    int notificationScheme;
-    int categoryId;
-}
-
-public struct NewProject {
+public struct ProjectRequest {
     string key;
     string name;
     string projectTypeKey;

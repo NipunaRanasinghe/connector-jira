@@ -31,7 +31,7 @@ public function main (string[] args) {
     //**************************************************************************************************************
     //Creates new a project named "Test Project - Production Support"
 
-    jira:NewProject newProject =
+    jira:ProjectRequest newProject =
     {
         key:"TESTPROJECT",
         name:"Test Project - Production Support",
@@ -56,7 +56,7 @@ public function main (string[] args) {
 
     //**************************************************************************************************************
     //Partially updates details of an existing project
-    jira:ProjectUpdate projectUpdate =
+    jira:ProjectRequest projectUpdate =
     {
         lead:"inshaf@wso2.com",
         projectTypeKey:"business"

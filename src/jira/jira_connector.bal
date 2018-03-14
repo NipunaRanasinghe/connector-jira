@@ -61,12 +61,10 @@ public connector JiraConnector () {
 
         int i = 0;
         foreach (jsonProject in jsonResponseArray) {
-            projects[i]= <Project,createProjectSummary()>jsonProject;
+            projects[i] = <Project, createProjectSummary()>jsonProject;
             i = i + 1;
         }
         return projects, e;
-
-
     }
 
     @Description {value:"Returns detailed representation of a project."}
@@ -91,7 +89,7 @@ public connector JiraConnector () {
             return null, e;
         }
 
-        jsonResponse.leadName = jsonResponse.lead!=null?jsonResponse.lead.name!=null?jsonResponse.lead.name:"":"";
+        jsonResponse.leadName = jsonResponse.lead != null ? jsonResponse.lead.name != null ? jsonResponse.lead.name : "" : "";
         project, err = <Project>jsonResponse;
         e = <JiraConnectorError, toConnectorError()>err;
         return project, e;
@@ -102,7 +100,7 @@ public connector JiraConnector () {
     @Param {value:"newProject: struct which contains the mandatory fields for new project creation"}
     @Return {value:"Returns true if the project was created was successfully,otherwise returns false"}
     @Return {value:"JiraConnectorError: Error Object"}
-    action createNewProject (NewProject newProject) (boolean, JiraConnectorError) {
+    action createNewProject (ProjectRequest newProject) (boolean, JiraConnectorError) {
         http:OutRequest request = {};
         http:InResponse response = {};
         JiraConnectorError e;
@@ -132,13 +130,13 @@ public connector JiraConnector () {
 
     }
 
-    @Description {value:"Updates a project. Only non null values sent in 'ProjectUpdate' structure will
+    @Description {value:"Updates a project. Only non null values sent in 'ProjectRequest' structure will
     be updated in the project. Values available for the assigneeType field are: 'PROJECT_LEAD' and 'UNASSIGNED'."}
     @Param {value:"projectIdOrKey: unique string which represents the project id or project key of a jira project"}
     @Param {value:"update: structure containing fields which need to be updated"}
     @Return {value:"Returns true if project was updated successfully,otherwise return false"}
     @Return {value:"JiraConnectorError: Error Object"}
-    action updateProject (string projectIdOrKey, ProjectUpdate update) (boolean, JiraConnectorError) {
+    action updateProject (string projectIdOrKey, ProjectRequest update) (boolean, JiraConnectorError) {
         http:OutRequest request = {};
         http:InResponse response = {};
         JiraConnectorError e;
@@ -184,11 +182,7 @@ public connector JiraConnector () {
         if (e != null) {
             return false, e;
         }
-
-        else {
-            return true, e;
-        }
-
+        return true, e;
     }
 
     @Description {value:"Returns all existing project categories"}
@@ -211,14 +205,14 @@ public connector JiraConnector () {
         }
 
         jsonResponseArray, err = (json[])jsonResponse;
-        int x = 0;
+        int i = 0;
         foreach (jsonProjectCategory in jsonResponseArray) {
-            projectCategories[x], err = <ProjectCategory>jsonProjectCategory;
+            projectCategories[i], err = <ProjectCategory>jsonProjectCategory;
             if (err != null) {
                 e = <JiraConnectorError, toConnectorError()>err;
                 return null, e;
             }
-            x = x + 1;
+            i = i + 1;
         }
         return projectCategories, e;
 
@@ -252,10 +246,7 @@ public connector JiraConnector () {
             return false, e;
         }
 
-        else {
-            return true, null;
-        }
-
+        return true, null;
     }
 
     @Description {value:"Delete a project category."}
@@ -275,9 +266,7 @@ public connector JiraConnector () {
         if (e != null) {
             return false, e;
         }
-        else {
-            return true, null;
-        }
+        return true, null;
     }
 
 
