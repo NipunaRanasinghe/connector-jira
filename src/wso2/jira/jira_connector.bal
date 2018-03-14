@@ -19,7 +19,7 @@
 package src.wso2.jira;
 import ballerina.net.http;
 import src.wso2.jira.utils.constants;
-//global variables to provide authentication in bind functions
+
 
 
 @Description {value:"Jira client connector"}
@@ -29,7 +29,7 @@ public connector JiraConnector () {
     endpoint<http:HttpClient> jiraEndpoint {
         create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
     }
-    http:HttpConnectorError httpError;
+    http:HttpConnectorError connectionError;
 
     @Description {value:"Returns all projects which are visible for the currently logged in user.
     If no user is logged in, it returns the list of projects that are visible when using anonymous access"}
@@ -45,40 +45,29 @@ public connector JiraConnector () {
         json jsonResponse;
         json[] jsonResponseArray;
 
-        //Populate Authorization Header
+        //Adds Authorization Header
         constructAuthHeader(request);
-        response, httpError = jiraEndpoint.get("/project", request);
+        response, connectionError = jiraEndpoint.get("/project", request);
         //Evaluate http response for connection error and server errors
-        jsonResponse, e = validateResponse(response, httpError);
+        jsonResponse, e = getValidatedResponse(response, connectionError);
 
         if (e != null) {
             return null, e;
         }
-        else {
-            jsonResponseArray, err = (json[])jsonResponse;
-            if (err != null) {
-                e = <JiraConnectorError, toConnectorError()>err;
-                return null, e;
-            }
-            int x = 0;
-            foreach (jsonProject in jsonResponseArray) {
-                //Checks fields in json object and add missing fields to use json to struct direct conversion
-                jsonProject.leadName = jsonProject.lead == null ? "" :
-                                       jsonProject.lead.name == null ? "" : jsonProject.lead.name;
-                jsonProject.issueTypes = jsonProject.issueTypes == null ? [] : jsonProject.issueTypes;
-                jsonProject.description = jsonProject.description == null ? "" : jsonProject.description;
-                jsonProject.components = jsonProject.components == null ? [] : jsonProject.components;
-                jsonProject.versions = jsonProject.versions == null ? [] : jsonProject.versions;
 
-                projects[x], err = <Project>jsonProject;
-                if (err != null) {
-                    e = <JiraConnectorError, toConnectorError()>err;
-                    return null, e;
-                }
-                x = x + 1;
-            }
-            return projects, e;
+        jsonResponseArray, err = (json[])jsonResponse;
+        if (err != null) {
+            e = <JiraConnectorError, toConnectorError()>err;
+            return null, e;
         }
+
+        int i = 0;
+        foreach (jsonProject in jsonResponseArray) {
+            projects[i]= <Project,createProjectSummary()>jsonProject;
+            i = i + 1;
+        }
+        return projects, e;
+
 
     }
 
@@ -93,23 +82,21 @@ public connector JiraConnector () {
         Project project;
         JiraConnectorError e;
         error err;
-
         json jsonResponse;
+
         constructAuthHeader(request);
 
-        response, httpError = jiraEndpoint.get("/project/" + projectIdOrKey, request);
-        jsonResponse, e = validateResponse(response, httpError);
+        response, connectionError = jiraEndpoint.get("/project/" + projectIdOrKey, request);
+        jsonResponse, e = getValidatedResponse(response, connectionError);
 
         if (e != null) {
             return null, e;
         }
 
-        else {
-            jsonResponse["leadName"] = jsonResponse["lead"]["name"];
-            project, err = <Project>jsonResponse;
-            e = <JiraConnectorError, toConnectorError()>err;
-            return project, e;
-        }
+        jsonResponse.leadName = jsonResponse.lead!=null?jsonResponse.lead.name!=null?jsonResponse.lead.name:"":"";
+        project, err = <Project>jsonResponse;
+        e = <JiraConnectorError, toConnectorError()>err;
+        return project, e;
 
     }
 
@@ -135,16 +122,15 @@ public connector JiraConnector () {
         request.setJsonPayload(jsonPayload);
 
 
-        response, httpError = jiraEndpoint.post("/project", request);
-        jsonResponse, e = validateResponse(response, httpError);
+        response, connectionError = jiraEndpoint.post("/project", request);
+        jsonResponse, e = getValidatedResponse(response, connectionError);
 
         if (e != null) {
             return false, e;
         }
 
-        else {
-            return true, e;
-        }
+
+        return true, e;
 
     }
 
@@ -163,7 +149,7 @@ public connector JiraConnector () {
         json jsonPayload;
         constructAuthHeader(request);
 
-        jsonPayload = <json, toJsonProject()>update;
+        jsonPayload = <json, createJsonProjectRequest()>update;
         if (err != null) {
             e = <JiraConnectorError, toConnectorError()>err;
             return false, e;
@@ -171,16 +157,15 @@ public connector JiraConnector () {
 
         request.setJsonPayload(jsonPayload);
 
-        response, httpError = jiraEndpoint.put("/project/" + projectIdOrKey, request);
-        jsonResponse, e = validateResponse(response, httpError);
+        response, connectionError = jiraEndpoint.put("/project/" + projectIdOrKey, request);
+        jsonResponse, e = getValidatedResponse(response, connectionError);
 
         if (e != null) {
             return false, e;
         }
 
-        else {
-            return true, e;
-        }
+        return true, e;
+
 
     }
 
@@ -195,8 +180,8 @@ public connector JiraConnector () {
         json jsonResponse;
         constructAuthHeader(request);
 
-        response, httpError = jiraEndpoint.delete("/project/" + projectIdOrKey, request);
-        jsonResponse, e = validateResponse(response, httpError);
+        response, connectionError = jiraEndpoint.delete("/project/" + projectIdOrKey, request);
+        jsonResponse, e = getValidatedResponse(response, connectionError);
 
         if (e != null) {
             return false, e;
@@ -220,26 +205,25 @@ public connector JiraConnector () {
         json jsonResponse;
         json[] jsonResponseArray;
         constructAuthHeader(request);
-        response, httpError = jiraEndpoint.get("/projectCategory", request);
-        jsonResponse, e = validateResponse(response, httpError);
+        response, connectionError = jiraEndpoint.get("/projectCategory", request);
+        jsonResponse, e = getValidatedResponse(response, connectionError);
 
         if (e != null) {
             return null, e;
         }
 
-        else {
-            jsonResponseArray, err = (json[])jsonResponse;
-            int x = 0;
-            foreach (jsonProjectCategory in jsonResponseArray) {
-                projectCategories[x], err = <ProjectCategory>jsonProjectCategory;
-                if (err != null) {
-                    e = <JiraConnectorError, toConnectorError()>err;
-                    return null, e;
-                }
-                x = x + 1;
+        jsonResponseArray, err = (json[])jsonResponse;
+        int x = 0;
+        foreach (jsonProjectCategory in jsonResponseArray) {
+            projectCategories[x], err = <ProjectCategory>jsonProjectCategory;
+            if (err != null) {
+                e = <JiraConnectorError, toConnectorError()>err;
+                return null, e;
             }
-            return projectCategories, e;
+            x = x + 1;
         }
+        return projectCategories, e;
+
     }
 
     @Description {value:"Create a new project category"}
@@ -264,8 +248,8 @@ public connector JiraConnector () {
 
         request.setJsonPayload(jsonPayload);
 
-        response, httpError = jiraEndpoint.post("/projectCategory", request);
-        jsonResponse, e = validateResponse(response, httpError);
+        response, connectionError = jiraEndpoint.post("/projectCategory", request);
+        jsonResponse, e = getValidatedResponse(response, connectionError);
         if (e != null) {
             return false, e;
         }
@@ -288,8 +272,8 @@ public connector JiraConnector () {
 
         constructAuthHeader(request);
 
-        response, httpError = jiraEndpoint.delete("/projectCategory/" + projectCategoryId, request);
-        jsonResponse, e = validateResponse(response, httpError);
+        response, connectionError = jiraEndpoint.delete("/projectCategory/" + projectCategoryId, request);
+        jsonResponse, e = getValidatedResponse(response, connectionError);
         if (e != null) {
             return false, e;
         }
@@ -311,8 +295,8 @@ public connector JiraConnector () {
     //
     //    constructAuthHeader(authType,request);
     //
-    //    response, httpError = jiraEndpoint.get("/project/" + projectIdOrKey + "/role/" + projectRoleId, request);
-    //    jsonResponse, e = validateResponse(response, httpError);
+    //    response, connectionError = jiraEndpoint.get("/project/" + projectIdOrKey + "/role/" + projectRoleId, request);
+    //    jsonResponse, e = getValidatedResponse(response, connectionError);
     //
     //    if (e != null) {
     //        return null, e;
@@ -343,8 +327,8 @@ public connector JiraConnector () {
     //
     //    constructAuthHeader(authType,request);
     //
-    //    response, httpError = jiraEndpoint.get("/project/" + projectIdOrKey+"/statuses", request);
-    //    jsonResponse, e = validateResponse(response, httpError);
+    //    response, connectionError = jiraEndpoint.get("/project/" + projectIdOrKey+"/statuses", request);
+    //    jsonResponse, e = getValidatedResponse(response, connectionError);
     //
     //    if (e != null) {
     //        return null, e;
@@ -406,8 +390,8 @@ public connector JiraConnector () {
     //    }
     //
     //    request.setJsonPayload(jsonPayload);
-    //    response, httpError = jiraEndpoint.post("/project/" + projectIdOrKey+"/role/"+projectRoleId, request);
-    //    jsonResponse, e = validateResponse(response, httpError);
+    //    response, connectionError = jiraEndpoint.post("/project/" + projectIdOrKey+"/role/"+projectRoleId, request);
+    //    jsonResponse, e = getValidatedResponse(response, connectionError);
     //
     //    if (e != null) {
     //        return false, e;

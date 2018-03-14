@@ -20,13 +20,13 @@ public function main (string[] args) {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-    ////**************************************************************************************************************
-    ////Gets descriptions of all the existing jira projects
-    //io:println("\n\n");
-    //io:println("ACTION: getAllProjectSummaries()");
-    //var projects, e = jiraConnector.getAllProjectSummaries();
-    //io:println(projects);
-    //io:println(e);
+    //**************************************************************************************************************
+    //Gets descriptions of all the existing jira projects
+    io:println("\n\n");
+    io:println("ACTION: getAllProjectSummaries()");
+    var projects, e = jiraConnector.getAllProjectSummaries();
+    io:println(projects);
+    io:println(e);
 
 
     //**************************************************************************************************************
@@ -122,7 +122,7 @@ public function main (string[] args) {
     io:println(e);
 
     //**************************************************************************************************************
-    //Remove group "pasan@wso2.com" from "developers" role.
+    //Remove user "pasan@wso2.com" from "developers" role.
     io:println("\n\n");
     io:println("BIND FUNCTION: project.removeUserFromRole()");
     result, e = project.removeUserFromRole(jira:ProjectRoleType.DEVELOPERS, "pasan@wso2.com");
@@ -176,9 +176,9 @@ public function main (string[] args) {
 
 
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //                                        Samples - Jira Project Category                                         //
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////                                        Samples - Jira Project Category                                         //
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //gets information of all existing project categories
     io:println("\n\n");
@@ -197,9 +197,9 @@ public function main (string[] args) {
     io:println(e);
 
 
-    var pointer, e =  jiraConnector.deleteProjectCategory("10571");
-    io:println(pointer);
-    io:println(e);
+    //var pointer, e =  jiraConnector.deleteProjectCategory("10571");
+    //io:println(pointer);
+    //io:println(e);
 
 }
 

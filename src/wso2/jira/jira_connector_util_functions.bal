@@ -38,16 +38,17 @@ public function constructAuthHeader (http:OutRequest request) {
 
 @Description {value:"Checks whether the http response contains any errors "}
 @Param {value:"request: The http response object"}
-@Param {value:"httpError: http response error object"}
-public function validateResponse (http:InResponse response, http:HttpConnectorError httpError) (json, JiraConnectorError) {
+@Param {value:"connectionError: http response error object"}
+//TODO: Rename to getResponse
+public function getValidatedResponse (http:InResponse response, http:HttpConnectorError connectionError) (json, JiraConnectorError) {
 
     JiraConnectorError e = {|type|:null, message:"", cause:null};
 
     //checks for any http errors
-    if (httpError != null) {
+    if (connectionError != null) {
         e.|type| = "HTTP Error";
-        e.message = httpError.message;
-        e.cause = httpError.cause;
+        e.message = connectionError.message;
+        e.cause = connectionError.cause;
         return null, e;
     }
         //checks for invalid server responses
@@ -135,7 +136,7 @@ transformer <error source, JiraConnectorError target> toConnectorError() {
     target = source != null ? {message:source.message, cause:source.cause} : null;
 }
 
-transformer <ProjectUpdate source, json target> toJsonProject() {
+transformer <ProjectUpdate source, json target> createJsonProjectRequest() {
     target.key = source.key != "" ? (json)source.key : null;
     target.name = source.name != "" ? (json)source.name : null;
     target.projectTypeKey = source.projectTypeKey != "" ? (json)source.projectTypeKey : null;
@@ -150,3 +151,24 @@ transformer <ProjectUpdate source, json target> toJsonProject() {
     target.notificationScheme = source.notificationScheme != 0 ? (json)source.notificationScheme : null;
     target.categoryId = source.categoryId != 0 ? (json)source.categoryId : null;
 }
+
+transformer <json source, Project target> createProjectSummary() {
+    target.self = source.self.toString();
+    target.id = source.id.toString();
+    target.key = source.key.toString();
+    target.name = source.name.toString();
+    target.description = source.description != null ? source.description.toString() : "";
+    target.leadName = source.lead != null ? source.lead.name != null ? source.lead.name.toString() : "" : "";
+    target.projectTypeKey = source.projectTypeKey.toString();
+    target.projectCategory = source.projectCategory != null ? <ProjectCategory, createProjectCategory()>source.projectCategory:null;
+}
+
+transformer <json source, ProjectCategory target> createProjectCategory() {
+    target.self = source.self != null ? source.self.toString() : "";
+    target.name = source.name != null ? source.name.toString() : "";
+    target.id = source.id != null ? source.id.toString() : "";
+    target.description = source.description != null ? source.description.toString() : "";
+}
+
+
+
