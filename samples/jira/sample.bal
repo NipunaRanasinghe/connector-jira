@@ -1,7 +1,6 @@
-package samples.wso2.jira;
+package samples.jira;
 import ballerina.io;
-import src.wso2.jira;
-
+import src.jira;
 
 
 public function main (string[] args) {

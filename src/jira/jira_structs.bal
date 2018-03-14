@@ -16,10 +16,10 @@
 // under the License.
 //
 
-package src.wso2.jira;
-import src.wso2.jira.utils.constants;
+package src.jira;
 import ballerina.net.http;
 
+http:HttpClient jiraHttpClient = create http:HttpClient(JIRA_REST_API_ENDPOINT, getHttpConfigs());
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                               Jira Project                                                         //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -44,7 +44,7 @@ public struct Project {
 @Return {value:"JiraConnectorError: Error Object"}
 public function <Project project> getProjectLeadUserDetails () (User, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
-        create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
+        jiraHttpClient;
     }
     http:HttpConnectorError connectionError;
     http:OutRequest request = {};
@@ -80,7 +80,7 @@ public function <Project project> getProjectLeadUserDetails () (User, JiraConnec
 @Return {value:"JiraConnectorError: Error Object"}
 public function <Project project> getRoleDetails (ProjectRoleType projectRoleType) (ProjectRole, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
-        create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
+        jiraHttpClient;
     }
     http:HttpConnectorError connectionError;
     http:OutRequest request = {};
@@ -120,7 +120,7 @@ public function <Project project> getRoleDetails (ProjectRoleType projectRoleTyp
 public function <Project project> addUserToRole (ProjectRoleType projectRoleType,
                                                  string userName) (boolean, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
-        create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
+        jiraHttpClient;
     }
     http:HttpConnectorError connectionError;
     http:OutRequest request = {};
@@ -158,7 +158,7 @@ public function <Project project> addUserToRole (ProjectRoleType projectRoleType
 public function <Project project> addGroupToRole (ProjectRoleType projectRoleType,
                                                   string groupName) (boolean, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
-        create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
+        jiraHttpClient;
     }
     http:HttpConnectorError connectionError;
     http:OutRequest request = {};
@@ -195,7 +195,7 @@ public function <Project project> addGroupToRole (ProjectRoleType projectRoleTyp
 @Return {value:"JiraConnectorError: Error Object"}
 public function <Project project> removeUserFromRole (ProjectRoleType projectRoleType, string actorName) (boolean, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
-        create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
+        jiraHttpClient;
     }
     http:HttpConnectorError connectionError;
     http:OutRequest request = {};
@@ -233,7 +233,7 @@ public function <Project project> removeUserFromRole (ProjectRoleType projectRol
 @Return {value:"JiraConnectorError: Error Object"}
 public function <Project project> removeGroupFromRole (ProjectRoleType projectRoleType, string groupName) (boolean, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
-        create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
+        jiraHttpClient;
     }
     http:HttpConnectorError connectionError;
     http:OutRequest request = {};
@@ -269,7 +269,7 @@ public function <Project project> removeGroupFromRole (ProjectRoleType projectRo
 @Return {value:"JiraConnectorError: Error Object"}
 public function <Project project> getAllIssueTypeStatuses () (ProjectStatus[], JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
-        create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
+        jiraHttpClient;
     }
     http:HttpConnectorError connectionError;
     http:OutRequest request = {};
@@ -322,7 +322,7 @@ public function <Project project> getAllIssueTypeStatuses () (ProjectStatus[], J
 @Return {value:"JiraConnectorError: Error Object"}
 public function <Project project> changeProjectType (ProjectType newProjectType) (boolean, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
-        create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
+        jiraHttpClient;
     }
     http:HttpConnectorError connectionError;
     http:OutRequest request = {};
@@ -370,7 +370,7 @@ public struct ProjectComponentSummary {
 @Return {value:"JiraConnectorError: Error Object"}
 public function <ProjectComponentSummary projectComponentSummary> getAllDetails () (ProjectComponent, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
-        create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
+        jiraHttpClient;
     }
     http:HttpConnectorError connectionError;
 
@@ -434,7 +434,7 @@ public struct ProjectComponent {
 @Return {value:"JiraConnectorError: Error Object"}
 public function <ProjectComponent projectComponent> getLeadUserDetails () (User, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
-        create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
+        jiraHttpClient;
     }
     http:HttpConnectorError connectionError;
 
@@ -466,7 +466,7 @@ public function <ProjectComponent projectComponent> getLeadUserDetails () (User,
 
 public function <ProjectComponent projectComponent> getAssigneeUserDetails () (User, JiraConnectorError) {
     endpoint<http:HttpClient> jiraClient {
-        create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
+        jiraHttpClient;
     }
     http:HttpConnectorError connectionError;
 

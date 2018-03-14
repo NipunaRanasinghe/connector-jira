@@ -16,9 +16,8 @@
 // under the License.
 //
 
-package src.wso2.jira;
+package src.jira;
 import ballerina.net.http;
-import src.wso2.jira.utils.constants;
 import ballerina.config;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -52,8 +51,8 @@ public function getValidatedResponse (http:InResponse response, http:HttpConnect
         return null, e;
     }
         //checks for invalid server responses
-    else if (response.statusCode != constants:STATUS_CODE_OK && response.statusCode != constants:STATUS_CODE_CREATED
-             && response.statusCode != constants:STATUS_CODE_NO_CONTENT) {
+    else if (response.statusCode != STATUS_CODE_OK && response.statusCode != STATUS_CODE_CREATED
+             && response.statusCode != STATUS_CODE_NO_CONTENT) {
         json res;
         e.|type| = "Server Error";
         e.message = response.reasonPhrase;
@@ -95,25 +94,25 @@ public function getHttpConfigs () (http:Options) {
 
 function getProjectRoleIdFromEnum (ProjectRoleType |type|) (string) {
     if (|type| == ProjectRoleType.ADMINISTRATORS) {
-        return constants:ROLE_ID_ADMINISTRATORS;
+        return ROLE_ID_ADMINISTRATORS;
     }
     else if (|type| == ProjectRoleType.CSAT_ADMINISTRATORS) {
-        return constants:ROLE_ID_CSAT_DEVELOPERS;
+        return ROLE_ID_CSAT_DEVELOPERS;
     }
     else if (|type| == ProjectRoleType.DEVELOPERS) {
-        return constants:ROLE_ID_DEVELOPERS;
+        return ROLE_ID_DEVELOPERS;
     }
     else if (|type| == ProjectRoleType.EXTERNAL_CONSULTANT) {
-        return constants:ROLE_ID_EXTERNAL_CONSULTANTS;
+        return ROLE_ID_EXTERNAL_CONSULTANTS;
     }
     else if (|type| == ProjectRoleType.NOTIFICATIONS) {
-        return constants:ROLE_ID_NOTIFICATIONS;
+        return ROLE_ID_NOTIFICATIONS;
     }
     else if (|type| == ProjectRoleType.OBSERVER) {
-        return constants:ROLE_ID_OBSERVER;
+        return ROLE_ID_OBSERVER;
     }
     else if (|type| == ProjectRoleType.USERS) {
-        return constants:ROLE_ID_USERS;
+        return ROLE_ID_USERS;
     }
     else {
         return "";

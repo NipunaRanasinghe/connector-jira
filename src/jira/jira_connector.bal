@@ -16,10 +16,8 @@
 // under the License.
 //
 
-package src.wso2.jira;
+package src.jira;
 import ballerina.net.http;
-import src.wso2.jira.utils.constants;
-
 
 
 @Description {value:"Jira client connector"}
@@ -27,7 +25,7 @@ public connector JiraConnector () {
 
     //creates HttpClient Endpoint
     endpoint<http:HttpClient> jiraEndpoint {
-        create http:HttpClient(constants:JIRA_REST_API_ENDPOINT, getHttpConfigs());
+        create http:HttpClient(JIRA_REST_API_ENDPOINT, getHttpConfigs());
     }
     http:HttpConnectorError connectionError;
 
