@@ -1,18 +1,32 @@
-package samples.jira;
+//package samples.jira;
 import ballerina.io;
 import src.jira;
 
 
 public function main (string[] args) {
 
+    if(lengthof(args)==0){
+        io:println("Error: No argument found");
+    }else if(args[0]=="Run All Examples") {
+        runAllSamples();
+    }else{
+        io:println("Invalid Argument: "+args[0]);
+    }
+}
 
+
+
+
+
+
+
+function runAllSamples(){
     endpoint<jira:JiraConnector> jiraConnector {
         create jira:JiraConnector();
     }
 
     jira:JiraConnectorError e;
     boolean result;
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //                                         Samples - Jira Project                                                 //
@@ -24,6 +38,7 @@ public function main (string[] args) {
     io:println("\n\n");
     io:println("ACTION: getAllProjectSummaries()");
     var projects, e = jiraConnector.getAllProjectSummaries();
+
     io:println(projects);
     io:println(e);
 
@@ -203,8 +218,10 @@ public function main (string[] args) {
 }
 
 
+function printSampleResponse(jira:JiraConnector e){
+    if(e!=null){
+        io:println();
+    }
 
 
-
-
-
+}
