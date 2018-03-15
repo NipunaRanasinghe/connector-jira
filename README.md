@@ -6,7 +6,7 @@ issue tracking, and project management functions.
 The connector uses the [JIRA REST API version 7.2.2](https://docs.atlassian.com/software/jira/docs/api/REST/7.2.2/) to connect to JIRA, work with JIRA projects, 
 view and update issues, work with jira user accounts, and more.
 
-![Atlassian Jira](jira_logo.png)
+![Atlassian Jira](jira_logo.jpg)
 
 
 
@@ -54,27 +54,57 @@ you can create a new Jira account from [JIRA Sign up page](https://id.atlassian.
 
 You can easily test the following actions using the `sample.bal` file.
 
-1. Navigate to the `sample.bal` located in the folder `Package_Jira/samples/jira/ ` .
+1. Navigate to the folder `Package_Jira/samples/jira/ ` .
 2. Run the following commands to execute the sample.
-    `jira$ ballerina run sample.bal "Run All Samples"
+
+    ```$ ballerina run sample.bal "Run All Samples"```
 
 ## Working with Jira connector actions
 
-Ballerina Jira connector basically provides two types of functionalities which are, Connector-bound
-and entity-bound actions
+Ballerina Jira connector API basically provides two types of functionalities which are, Connector-based
+and entity-based actions
 
-####Connector-bound Actions
-Connector-bound actions provide generic functionalities
+- #####Connector Based Actions
+    Connector-bound actions provide generic functionalities, with the following format.
 
-##### Example
+    Syntax: `connectorName.actionName(arguments)`
 
 
-####Entity-bound Actions
-Entity-bound actions are special set of actions which are specified on a Jira Entity (Eg: Jira Project,Jira Issue etc.)
+- #####Entity Based Actions
+    Entity-bound actions are special set of actions which are defined on a Jira Entity (Eg: Jira Project,Jira Issue etc.),
+    which are also called struct-bound functions. Ballerina Jira connector API design allows users to retrieve the jira 
+    basic entities using connector-bound actions and then use entity-bound actions directly on the obtained structured entities
 
-##### Example
+    Syntax: `entityName.actionName(arguments)`
+ 
+
+ 
+##### Example - Connector based actions and Entity based Actions
+
+ ```
+ endpoint<jira:JiraConnector> jiraConnector {
+         create jira:JiraConnector();
+     }
+     jira:Project project;
+     jira:JiraConnectorError e;
+     string projectKey = "TESTKEY";
+     
+     //connector-bound action
+     project, e = jiraConnector.getProject(projectKey);
+     
+     if (e==null){
+        User lead;
+        
+        //entity-bound action
+        lead,e = project.getLeadUserDetails();
+        
+     }
+     
+    
+ ```
 
 
 Now that you have basic knowledge about to how Ballerina Jira connector works, 
 use the information in the following topics to perform various operations with the connector.
-nector](#working-with-jira-connector-actions)
+
+[Working with Jira Projects](#working-with-jira-projects)
