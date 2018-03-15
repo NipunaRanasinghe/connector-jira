@@ -6,7 +6,7 @@ public function main (string[] args) {
 
     if (lengthof (args) == 0) {
         io:println("Error: No argument found");
-    } else if (args[0] == "Run All Examples") {
+    } else if (args[0] == "Run All Samples") {
         runAllSamples();
     } else {
         io:println("Invalid Argument: " + args[0]);
@@ -92,6 +92,7 @@ function runAllSamples () {
     io:println("\n\n");
     io:println("ACTION: getProject()");
     var project, e = jiraConnector.getProject("10314");
+    io:println(project);
     printSampleResponse(e);
 
 

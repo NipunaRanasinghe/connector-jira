@@ -18,6 +18,7 @@
 
 package src.jira;
 import ballerina.net.http;
+import ballerina.io;
 
 
 @Description {value:"Jira client connector"}
@@ -54,7 +55,12 @@ public connector JiraConnector () {
         }
 
         jsonResponseArray, err = (json[])jsonResponse;
+        io:println(jsonResponseArray);
         if (err != null) {
+            e = <JiraConnectorError, toConnectorError()>err;
+            return null, e;
+        }else if(jsonResponseArray==null){
+            err = {message:"Error: server response doesn't contain any projects."};
             e = <JiraConnectorError, toConnectorError()>err;
             return null, e;
         }
