@@ -1,16 +1,15 @@
-//package samples.jira;
 import ballerina.io;
 import src.jira;
 
 
 public function main (string[] args) {
 
-    if(lengthof(args)==0){
+    if (lengthof (args) == 0) {
         io:println("Error: No argument found");
-    }else if(args[0]=="Run All Examples") {
+    } else if (args[0] == "Run All Examples") {
         runAllSamples();
-    }else{
-        io:println("Invalid Argument: "+args[0]);
+    } else {
+        io:println("Invalid Argument: " + args[0]);
     }
 }
 
@@ -20,7 +19,7 @@ public function main (string[] args) {
 
 
 
-function runAllSamples(){
+function runAllSamples () {
     endpoint<jira:JiraConnector> jiraConnector {
         create jira:JiraConnector();
     }
@@ -38,9 +37,7 @@ function runAllSamples(){
     io:println("\n\n");
     io:println("ACTION: getAllProjectSummaries()");
     var projects, e = jiraConnector.getAllProjectSummaries();
-
-    io:println(projects);
-    io:println(e);
+    printSampleResponse(e);
 
 
     //**************************************************************************************************************
@@ -65,8 +62,7 @@ function runAllSamples(){
     io:println("\n\n");
     io:println("ACTION: createNewProject()");
     result, e = jiraConnector.createNewProject(newProject);
-    io:println(result);
-    io:println(e);
+    printSampleResponse(e);
 
 
     //**************************************************************************************************************
@@ -79,9 +75,8 @@ function runAllSamples(){
     };
     io:println("\n\n");
     io:println("ACTION: updateProject()");
-    result, e = jiraConnector.updateProject("TESTPROJECT",projectUpdate);
-    io:println(result);
-    io:println(e);
+    result, e = jiraConnector.updateProject("TESTPROJECT", projectUpdate);
+    printSampleResponse(e);
 
 
     //**************************************************************************************************************
@@ -89,8 +84,7 @@ function runAllSamples(){
     io:println("\n\n");
     io:println("ACTION: deleteProject()");
     result, e = jiraConnector.deleteProject("TESTPROJECT");
-    io:println(result);
-    io:println(e);
+    printSampleResponse(e);
 
 
     //**************************************************************************************************************
@@ -98,8 +92,7 @@ function runAllSamples(){
     io:println("\n\n");
     io:println("ACTION: getProject()");
     var project, e = jiraConnector.getProject("10314");
-    io:println(project);
-    io:println(e);
+    printSampleResponse(e);
 
 
     //**************************************************************************************************************
@@ -107,8 +100,7 @@ function runAllSamples(){
     io:println("\n\n");
     io:println("BIND FUNCTION: project.getProjectLeadUserDetails()");
     var lead, e = project.getProjectLeadUserDetails();
-    io:println(lead);
-    io:println(e);
+    printSampleResponse(e);
 
 
     //**************************************************************************************************************
@@ -116,40 +108,35 @@ function runAllSamples(){
     io:println("\n\n");
     io:println("BIND FUNCTION: project.getRoleDetails()");
     var developers, e = project.getRoleDetails(jira:ProjectRoleType.DEVELOPERS);
-    io:println(developers);
-    io:println(e);
+    printSampleResponse(e);
 
     //**************************************************************************************************************
     //Add user "pasan@wso2.com" to "developers" role.
     io:println("\n\n");
     io:println("BIND FUNCTION: project.addUserToRole()");
-    result, e = project.addUserToRole(jira:ProjectRoleType.EXTERNAL_CONSULTANT,"pasan@wso2.com");
-    io:println(result);
-    io:println(e);
+    result, e = project.addUserToRole(jira:ProjectRoleType.EXTERNAL_CONSULTANT, "pasan@wso2.com");
+    printSampleResponse(e);
 
     //**************************************************************************************************************
     //Add group "support.client.AAALIFEDEV.user" to "developers" role.
     io:println("\n\n");
     io:println("BIND FUNCTION: project.addGroupToRole()");
     result, e = project.addGroupToRole(jira:ProjectRoleType.EXTERNAL_CONSULTANT, "support.client.AAALIFEDEV.user");
-    io:println(result);
-    io:println(e);
+    printSampleResponse(e);
 
     //**************************************************************************************************************
     //Remove user "pasan@wso2.com" from "developers" role.
     io:println("\n\n");
     io:println("BIND FUNCTION: project.removeUserFromRole()");
     result, e = project.removeUserFromRole(jira:ProjectRoleType.DEVELOPERS, "pasan@wso2.com");
-    io:println(result);
-    io:println(e);
+    printSampleResponse(e);
 
     //**************************************************************************************************************
     //Remove group "support.client.AAALIFEDEV.user" from "developers" role.
     io:println("\n\n");
     io:println("BIND FUNCTION: project.removeGroupFromRole()");
     result, e = project.removeGroupFromRole(jira:ProjectRoleType.DEVELOPERS, "support.client.AAALIFEDEV.user");
-    io:println(result);
-    io:println(e);
+    printSampleResponse(e);
 
 
     //**************************************************************************************************************
@@ -157,26 +144,21 @@ function runAllSamples(){
     io:println("\n\n");
     io:println("BIND FUNCTION: project.getAllIssueTypeStatuses()");
     var statuses, e = project.getAllIssueTypeStatuses();
-    io:println(statuses);
-    io:println(e);
-
+    printSampleResponse(e);
 
     //**************************************************************************************************************
     //Updates the type of the project ("business" or "software")
     io:println("\n\n");
     io:println("BIND FUNCTION: project.changeProjectType()");
     result, e = project.changeProjectType(jira:ProjectType.SOFTWARE);
-    io:println(result);
-    io:println(e);
-
+    printSampleResponse(e);
 
     //**************************************************************************************************************
     //get full details of a selected project component
     io:println("\n\n");
     io:println("BIND FUNCTION: componentSummary.getDetails()");
     var component, e = project.components[0].getAllDetails();
-    io:println(component);
-    io:println(e);
+    printSampleResponse(e);
 
 
     //**************************************************************************************************************
@@ -184,8 +166,7 @@ function runAllSamples(){
     io:println("\n\n");
     io:println("BIND FUNCTION: component.getLeadUserDetails()");
     var user, e = component.getLeadUserDetails();
-    io:println(user);
-    io:println(e);
+    printSampleResponse(e);
 
 
 
@@ -197,18 +178,16 @@ function runAllSamples(){
     //gets information of all existing project categories
     io:println("\n\n");
     io:println("ACTION: getAllProjectCategories()");
-    var categories, e =  jiraConnector.getAllProjectCategories();
-    io:println(categories);
-    io:println(e);
+    var categories, e = jiraConnector.getAllProjectCategories();
+    printSampleResponse(e);
 
 
     //creates new jira project category
     io:println("\n\n");
     io:println("ACTION: createNewProjectCategory()");
-    jira:NewProjectCategory newCategory = {name:"test-new category",description:"newCategory"};
-    result, e =  jiraConnector.createNewProjectCategory(newCategory);
-    io:println(result);
-    io:println(e);
+    jira:NewProjectCategory newCategory = {name:"test-new category", description:"newCategory"};
+    result, e = jiraConnector.createNewProjectCategory(newCategory);
+    printSampleResponse(e);
 
 
     //var pointer, e =  jiraConnector.deleteProjectCategory("10571");
@@ -218,9 +197,13 @@ function runAllSamples(){
 }
 
 
-function printSampleResponse(jira:JiraConnector e){
-    if(e!=null){
-        io:println();
+function printSampleResponse (jira:JiraConnectorError e) {
+    if (e == null) {
+        io:println("Successfull");
+    } else {
+        io:println("Failed");
+        io:println("Error:");
+        io:println(e);
     }
 
 
