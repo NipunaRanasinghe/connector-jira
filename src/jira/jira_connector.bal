@@ -225,9 +225,10 @@ public connector JiraConnector () {
     }
 
     @Description {value:"Create a new project category"}
-    @Return {value:"newCategory: struct which contains the mandatory fields for new project category creation "}
+    @Param {value:"newCategory: struct which contains the mandatory fields for new project category creation "}
+    @Return {value:"Returns true if project category was created successfully,otherwise return false"}
     @Return {value:"JiraConnectorError: Error Object"}
-    action createNewProjectCategory (NewProjectCategory newCategory) (boolean, JiraConnectorError) {
+    action createProjectCategory (NewProjectCategory newCategory) (boolean, JiraConnectorError) {
 
         http:OutRequest request = {};
         http:InResponse response = {};
@@ -256,7 +257,7 @@ public connector JiraConnector () {
     }
 
     @Description {value:"Delete a project category."}
-    @Return {value:"projectCategoryId: Jira id of the project category"}
+    @Param {value:"projectCategoryId: Jira id of the project category"}
     @Return {value:"Returns true if the project category was deleted successfully, otherwise returns false"}
     @Return {value:"JiraConnectorError: Error Object"}
     action deleteProjectCategory (string projectCategoryId) (boolean, JiraConnectorError) {

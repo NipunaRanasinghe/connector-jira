@@ -60,7 +60,7 @@ function runAllSamples () {
         categoryId:10000
     };
     io:println("\n\n");
-    io:println("ACTION: createNewProject()");
+    io:println("ACTION: createProject()");
     result, e = jiraConnector.createProject(newProject);
     printSampleResponse(e);
 
@@ -185,9 +185,9 @@ function runAllSamples () {
 
     //creates new jira project category
     io:println("\n\n");
-    io:println("ACTION: createNewProjectCategory()");
+    io:println("ACTION: createProjectCategory()");
     jira:NewProjectCategory newCategory = {name:"test-new category", description:"newCategory"};
-    result, e = jiraConnector.createNewProjectCategory(newCategory);
+    result, e = jiraConnector.createProjectCategory(newCategory);
     printSampleResponse(e);
 
 
