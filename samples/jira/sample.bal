@@ -61,7 +61,7 @@ function runAllSamples () {
     };
     io:println("\n\n");
     io:println("ACTION: createNewProject()");
-    result, e = jiraConnector.createNewProject(newProject);
+    result, e = jiraConnector.createProject(newProject);
     printSampleResponse(e);
 
 

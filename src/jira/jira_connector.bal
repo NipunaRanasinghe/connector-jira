@@ -106,7 +106,7 @@ public connector JiraConnector () {
     @Param {value:"newProject: struct which contains the mandatory fields for new project creation"}
     @Return {value:"Returns true if the project was created was successfully,otherwise returns false"}
     @Return {value:"JiraConnectorError: Error Object"}
-    action createNewProject (ProjectRequest newProject) (boolean, JiraConnectorError) {
+    action createProject (ProjectRequest newProject) (boolean, JiraConnectorError) {
         http:OutRequest request = {};
         http:InResponse response = {};
         JiraConnectorError e;

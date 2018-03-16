@@ -29,7 +29,7 @@ The following sections provide information on how to use Ballerina Jira connecto
 
 
 ### Getting started
-***
+
 
 - Install the ballerina version 0.964.0 distribution from [Ballerina Download Page](https://ballerinalang.org/downloads/).
 
@@ -158,14 +158,14 @@ use the information in the following sections to perform various operations with
 
 #### Connector Actions
 
-- [getAllProjects()](#getallprojects)
+- [getAllProjectSummaries()](#getallprojectsummaries)
 - [getProject()](#getproject)
 - [createProject()](#createprojct)
 - [updateProject()](#updateproject)
 - [deleteProject()](#deleteproject)
-- [getAllProjectCategories](#getallprojetcategories)
-- [createProjectCategory](#createprojectcategory)
-- [deleteProjectCategory](#deleteprojectcategory)
+- [getAllProjectCategories()](#getallprojetcategories)
+- [createProjectCategory()](#createprojectcategory)
+- [deleteProjectCategory()](#deleteprojectcategory)
 
 #### Entity-Based Actions
 
@@ -186,23 +186,54 @@ use the information in the following sections to perform various operations with
     - [getLeadUserDetails()](#getleaduserdetails)
     - [getAssigneeUserDetails()](#getassigneeuserdetails)
     
-    
-    
-### getAllProjects()
-
-Return all projects.
+ 
+***  
+#### getAllProjectSummaries ()
+ 
+  Returns all projects which are visible for the currently logged in user.
+    If no user is logged in, it returns the list of projects that are visible when using anonymous access"}  
 
 ###### Parameters
-`None`
-
-Name | Type | Description
------|------|------------
-name | string | Name of the organization and repository. (Eg: "organization/repository")
+   `None`
 
 ###### Returns
-* **jira:Porject[],  jira:jiraConnectorError**
+
+* Project[]: Array of projects for which the user has the BROWSE, ADMINISTER or PROJECT_ADMIN
+    project permission.
+* JiraConnectorError: Error Object 
+
+
+***  
+#### getProject (string projectIdOrKey)
+ 
+Returns a detailed representation for given a project.
+      
+###### Parameters
+* projectIdOrKey: unique string which represents the project id or project key of a jira project
+
+
+###### Returns
+
+* Project: Contains a full representation of a project, if the project exists,the user has permission
+      to view it and if no any error occured
+* JiraConnectorError: Error Object
+
+
+***  
+#### createProject (ProjectRequest newProject)
+ 
+Creates a new project.
     
-***
+    action createProject (ProjectRequest newProject)
+      
+###### Parameters
+* newProject: struct which contains the mandatory fields for new project creation
+
+###### Returns
+
+
+* boolean: Returns true if the project was created was successfully,otherwise returns false"}
+* JiraConnectorError: Error Object
 
 
 ## Working with Issues in JIRA
