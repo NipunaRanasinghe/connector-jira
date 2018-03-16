@@ -154,6 +154,57 @@ use the information in the following sections to perform various operations with
 
 ## Working with Projects in JIRA
 
+### API Reference
+
+#### Connector Actions
+
+- [getAllProjects()](#getallprojects)
+- [getProject()](#getproject)
+- [createProject()](#createprojct)
+- [updateProject()](#updateproject)
+- [deleteProject()](#deleteproject)
+- [getAllProjectCategories](#getallprojetcategories)
+- [createProjectCategory](#createprojectcategory)
+- [deleteProjectCategory](#deleteprojectcategory)
+
+#### Entity-Based Actions
+
+- Project
+    - [getLeadUserDetials()](#getleaduserdetails)
+    - [getRoleDetails()](#getroledetails)
+    - [addUserToRole()](#addusertorole)
+    - [addGroupToRole](#addgrouptorole)
+    - [removeUserFromRole()](#removeuserfromrole)
+    - [removeGroupFromRole()](#removegroupfromrole)
+    - [getAllIssueTypeStatuses()](#getallissuetypestatuses)
+    - [changeProjectType()](#changeprojecttype)
+    
+- ProjectComponentSummary
+    - [getAllDetails()](#getalldetails)
+
+- ProjectComponent
+    - [getLeadUserDetails()](#getleaduserdetails)
+    - [getAssigneeUserDetails()](#getassigneeuserdetails)
+    
+    
+    
+### getAllProjects()
+
+Return all projects.
+
+###### Parameters
+`None`
+
+Name | Type | Description
+-----|------|------------
+name | string | Name of the organization and repository. (Eg: "organization/repository")
+
+###### Returns
+* **jira:Porject[],  jira:jiraConnectorError**
+    
+***
+
+
 ## Working with Issues in JIRA
 [ To be Implemented ]
 
