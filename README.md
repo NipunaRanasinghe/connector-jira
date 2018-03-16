@@ -6,6 +6,7 @@ issue tracking, and project management functions.
 The connector uses the [JIRA REST API version 7.2.2](https://docs.atlassian.com/software/jira/docs/api/REST/7.2.2/) to connect to JIRA, work with JIRA projects, 
 view and update issues, work with jira user accounts, and more.
 
+![Overview](overview.png)
 
 |Ballerina Version | Connector Version | 
 |------------------|-------------------|
@@ -18,7 +19,6 @@ The Jira REST API is an ideal solution for the developers who want to integrate 
 and administrators who want to script interactions with the JIRA server. Because the Jira REST API is based on open 
 standards, you can use any web development language to access the API.
 
-### Why would you use a Ballerina Connector for Jira
 
 The following sections provide information on how to use Ballerina Jira connector.
 
@@ -170,7 +170,7 @@ use the information in the following sections to perform various operations with
 
 - [getAllProjectSummaries()](#getallprojectsummaries-)
 - [getProject()](#getproject-)
-- [createProject()](#createprojct-)
+- [createProject()](#createproject-)
 - [updateProject()](#updateproject-)
 - [deleteProject()](#deleteproject-)
 - [getAllProjectCategories()](#getallprojetcategories-)
@@ -195,8 +195,7 @@ use the information in the following sections to perform various operations with
 - ProjectComponent
     - [getLeadUserDetails()](#getleaduserdetails-)
     - [getAssigneeUserDetails()](#getassigneeuserdetails-)
-    
- 
+
 ***  
 #### getAllProjectSummaries ( )
  
@@ -324,10 +323,10 @@ Deletes a given project category.
 
 
 ## Working with Issues in JIRA
-[ To be Implemented ]
+**[ To be Implemented ]**
 
 ## Working with Users in JIRA
-[ To be Implemented ]
+**[ To be Implemented ]**
 
 
 

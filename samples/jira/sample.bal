@@ -50,7 +50,7 @@ function runAllSamples () {
         projectTypeKey:"software",
         projectTemplateKey:"com.pyxis.greenhopper.jira:basic-software-development-template",
         description:"Example Project description",
-        lead:"pasan@wso2.com",
+        lanaead:"pasan@wso2.com",
         url:"http://atlassian.com",
         assigneeType:"PROJECT_LEAD",
         avatarId:10005,
