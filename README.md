@@ -6,7 +6,7 @@ issue tracking, and project management functions.
 The connector uses the [JIRA REST API version 7.2.2](https://docs.atlassian.com/software/jira/docs/api/REST/7.2.2/) to connect to JIRA, work with JIRA projects, 
 view and update issues, work with jira user accounts, and more.
 
-![Overview](overview.png)
+![Overview](Overview.png)
 
 |Ballerina Version | Connector Version | 
 |------------------|-------------------|
