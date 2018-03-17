@@ -1,18 +1,14 @@
 # Ballerina Jira Connector
 
-
 This Ballerina client connector allows to connect to [Atlassian JIRA](https://www.jira.com), an online issue-tracking database. It provides bug tracking, 
 issue tracking, and project management functions.
 The connector uses the [JIRA REST API version 7.2.2](https://docs.atlassian.com/software/jira/docs/api/REST/7.2.2/) to connect to JIRA, work with JIRA projects, 
 view and update issues, work with jira user accounts, and more.
-
 ![Overview](Overview.png)
 
 |Ballerina Version | Connector Version | 
 |------------------|-------------------|
 |0.964.0 | 0.1 |
-
-
 ### Why do you need the REST API for Jira
 
 The Jira REST API is an ideal solution for the developers who want to integrate JIRA with other standalone or web applications, 
@@ -71,11 +67,11 @@ All the actions return two values: result and error. Results can be either`balle
     endpoint<jira:JiraConnector> jiraConnector {
         create jira:JiraConnector();
     }
-    jira:JiraConnectorError e;
+    string projectKey = "RRDEVSPRT";
+    
     jira:Project project;
     jira:JiraConnectorError e;
-    string projectKey = "RRDEVSPRT";
-  
+    
     project, e = jiraConnector.getProject(projectKey);
     
 ```
@@ -183,7 +179,7 @@ use the information in the following sections to perform various operations with
     - [getLeadUserDetials()](#getleaduserdetails-)
     - [getRoleDetails()](#getroledetails-)
     - [addUserToRole()](#addusertorole-)
-    - [addGroupToRole](#addgrouptorole-)
+    - [addGroupToRole()](#addgrouptorole-)
     - [removeUserFromRole()](#removeuserfromrole-)
     - [removeGroupFromRole()](#removegroupfromrole-)
     - [getAllIssueTypeStatuses()](#getallissuetypestatuses-)
@@ -243,19 +239,6 @@ Creates a new project.
 * JiraConnectorError: Error Object
 
 
-***  
-#### createProject (ProjectRequest newProject)
- 
-Creates a new project.
-    
-###### Parameters
-* newProject: struct which contains the mandatory fields for new project creation.
-
-###### Returns
-
-
-* boolean: Returns true if the project was created was successfully,otherwise returns false.
-* JiraConnectorError: Error Object.
 
 ***
 #### updateProject (string projectIdOrKey, ProjectRequest update)
