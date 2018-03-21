@@ -6,9 +6,13 @@ import ballerina.config;
 import ballerina.log;
 
 public function main (string[] args) {
-
-    runAllSamples();
-
+    if (lengthof (args) == 0) {
+        io:println("Error: No argument found");
+    } else if (args[0] == "Run All Samples") {
+        runAllSamples();
+    } else {
+        io:println("Invalid Argument: " + args[0]);
+    }
 }
 
 function runAllSamples () {
@@ -24,12 +28,12 @@ function runAllSamples () {
     //Validates provided user credentials
     io:println("\n\n");
     io:println("validating user credentials..");
-    isValid, e = jiraConnector.authenticate("ashan@wso2.com","ashan123");
+    isValid, e = jiraConnector.authenticate("ashan@wso2.com", "ashan123");
     printSampleResponse(e);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////                                          Samples - Jira Project                                                  //
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////                                          Samples - Jira Project                                                  //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //**************************************************************************************************************
     //Gets descriptions of all the existing jira projects
@@ -45,10 +49,10 @@ function runAllSamples () {
     io:println("BIND FUNCTION: projectSummary.getAllDetails()");
     jira:Project project;
     try {
-       project, e = projects[0].getAllDetails();
+        project, e = projects[0].getAllDetails();
         printSampleResponse(e);
     }
-    catch(error err){
+    catch (error err) {
 
     }
 
@@ -186,9 +190,9 @@ function runAllSamples () {
 
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////                                          Samples - Jira Project Category                                         //
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////                                          Samples - Jira Project Category                                         //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //gets information of all existing project categories
     io:println("\n\n");
