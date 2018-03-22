@@ -20,10 +20,11 @@ package src.jira;
 import ballerina.net.http;
 import ballerina.util;
 import ballerina.log;
+import ballerina.io;
 
 //Creates package-global Http client endpoint for jira REST API
-endpoint http:ClientEndpoint jiraHttpClientEP {targets:[ {uri:JIRA_REST_API_ENDPOINT}], chunking:http:Chunking. NEVER};
-http:HttpConnectorError connectionError;
+endpoint http:ClientEndpoint jiraHttpClientEP {targets:[{uri:JIRA_REST_API_ENDPOINT}], chunking:http:Chunking.NEVER};
+public http:HttpConnectorError connectionError;
 
 //package-global to store encoded user credentials
 string base64EncodedString = "";
@@ -42,9 +43,9 @@ public function <JiraConnector jiraConnector> authenticate (string username, str
     JiraConnectorError e = {};
 
     boolean|JiraConnectorError response = validateAuthentication(username, password);
-    match response{
+    match response {
         boolean => base64EncodedString = util:base64Encode(username + ":" + password);
-        JiraConnectorError => base64EncodedString = "";  
+        JiraConnectorError => base64EncodedString = "";
     }
     return response;
 }
@@ -64,11 +65,10 @@ public function <JiraConnector jiraConnector> getAllProjectSummaries () returns 
 
     //Adds Authorization Header
     constructAuthHeader(request);
-
     var httpResponseOut = jiraHttpClientEP -> get("/project?expand=description", request);
-    //Evaluate http response for connection error and server errors
+    //Evaluate http response for connection and server errors
     var jsonResponseOut = getValidatedResponse(httpResponseOut);
-    match jsonResponseOut{
+    match jsonResponseOut {
         JiraConnectorError errorOut => {
             return errorOut;
         }
@@ -108,17 +108,20 @@ public function <JiraConnector jiraConnector> getProject (string projectIdOrKey)
     //Adds Authorization Header
     constructAuthHeader(request);
     var httpResponseOut = jiraHttpClientEP -> get("/project/" + projectIdOrKey, request);
-    //Evaluate http response for connection error and server errors
+    //Evaluate http response for connection and server errors
     var jsonResponseOut = getValidatedResponse(httpResponseOut);
 
-    match jsonResponseOut{
+    match jsonResponseOut {
         JiraConnectorError errorOut => {
             return errorOut;
         }
         json jsonResponse => {
             jsonResponse.leadName = jsonResponse.lead != null ? jsonResponse.lead.name != null ? jsonResponse.lead.name : null : null;
             project, err = <Project>jsonResponse;
-            e = <JiraConnectorError, toConnectorError()>err;
+            if (err != null) {
+                e = <JiraConnectorError, toConnectorError()>err;
+                return e;
+            }
             return project;
         }
     }
@@ -135,21 +138,22 @@ public function <JiraConnector jiraConnector> createProject (ProjectRequest newP
     error err = {};
     json jsonPayload;
 
-    //Adds Authorization Header
-    constructAuthHeader(request);
 
     jsonPayload, err = <json>newProject;
-    if (err != null) {
+
+    if (!isEmpty(err)) {
         e = <JiraConnectorError, toConnectorError()>err;
         return e;
     }
     request.setJsonPayload(jsonPayload);
 
+    //Adds Authorization Header
+    constructAuthHeader(request);
     var httpResponseOut = jiraHttpClientEP -> post("/project", request);
-    //Evaluate http response for connection error and server errors
+    //Evaluate http response for connection and server errors
     var jsonResponseOut = getValidatedResponse(httpResponseOut);
 
-    match jsonResponseOut{
+    match jsonResponseOut {
         JiraConnectorError errorOut => {
             return errorOut;
         }
@@ -174,18 +178,18 @@ public function <JiraConnector jiraConnector> updateProject (string projectIdOrK
     json jsonPayload;
 
     jsonPayload = <json, createJsonProjectRequest()>update;
-    if (err != null) {
+    if (!isEmpty(err)) {
         e = <JiraConnectorError, toConnectorError()>err;
         return e;
     }
     request.setJsonPayload(jsonPayload);
 
     constructAuthHeader(request);
-    var httpResponseOut = jiraHttpClientEP ->  put("/project/" + projectIdOrKey, request);
-    //Evaluate http response for connection error and server errors
+    var httpResponseOut = jiraHttpClientEP -> put("/project/" + projectIdOrKey, request);
+    //Evaluate http response for connection and server errors
     var jsonResponseOut = getValidatedResponse(httpResponseOut);
 
-    match jsonResponseOut{
+    match jsonResponseOut {
         JiraConnectorError errorOut => {
             return errorOut;
         }
@@ -195,131 +199,126 @@ public function <JiraConnector jiraConnector> updateProject (string projectIdOrK
     }
 }
 
-//@Description {value:"Deletes a project."}
-//@Param {value:"projectIdOrKey: unique string which represents the project id or project key of a jira project"}
-//@Return {value:"Returns true if project was deleted successfully,otherwise return false"}
-//@Return {value:"JiraConnectorError: Error Object"}
-//public function <JiraConnector jiraConnector> deleteProject (string projectIdOrKey) (boolean, JiraConnectorError) {
-//    http:Request request = {};
-//    http:Response response = {};
-//    JiraConnectorError e = {};
-//    json jsonResponse;
-//
-//    if(jiraConnector==null){
-//        e = {message:"Unable to proceed with a null structure: jiraConnector"};
-//        return false,e;
-//    }
-//
-//    constructAuthHeader(request);
-//
-//    response, connectionError = jiraHttpClientEP-> delete("/project/" + projectIdOrKey, request);
-//    jsonResponse, e = getValidatedResponse(response, connectionError);
-//
-//    if (e != null) {
-//        return false, e;
-//    }
-//    return true, e;
-//}
-//
-//@Description {value:"Returns all existing project categories"}
-//@Return {value:"ProjectCategory[]: Array of structures which contain existing categories"}
-//@Return {value:"JiraConnectorError: Error Object"}
-//public function <JiraConnector jiraConnector> getAllProjectCategories () (ProjectCategory[], JiraConnectorError) {
-//    http:Request request = {};
-//    http:Response response = {};
-//    ProjectCategory[] projectCategories = [];
-//    JiraConnectorError e = {};
-//    error err = {};
-//    json jsonResponse;
-//    json[] jsonResponseArray;
-//
-//    if(jiraConnector==null){
-//        e = {message:"Unable to proceed with a null structure: jiraConnector"};
-//        return null,e;
-//    }
-//
-//    constructAuthHeader(request);
-//    response, connectionError = jiraHttpClientEP-> get("/projectCategory", request);
-//    jsonResponse, e = getValidatedResponse(response, connectionError);
-//
-//    if (e != null) {
-//        return null, e;
-//    }
-//
-//    jsonResponseArray, err = (json[])jsonResponse;
-//    int i = 0;
-//    foreach (jsonProjectCategory in jsonResponseArray) {
-//        projectCategories[i], err = <ProjectCategory>jsonProjectCategory;
-//        if (err != null) {
-//            e = <JiraConnectorError, toConnectorError()>err;
-//            return null, e;
-//        }
-//        i = i + 1;
-//    }
-//    return projectCategories, e;
-//
-//}
-//
-//@Description {value:"Create a new project category"}
-//@Param {value:"newCategory: struct which contains the mandatory fields for new project category creation "}
-//@Return {value:"Returns true if project category was created successfully,otherwise return false"}
-//@Return {value:"JiraConnectorError: Error Object"}
-//public function <JiraConnector jiraConnector> createProjectCategory (ProjectCategoryRequest newCategory) (boolean, JiraConnectorError) {
-//    http:Request request = {};
-//    http:Response response = {};
-//    JiraConnectorError e = {};
-//    error err = {};
-//    json jsonResponse;
-//    json jsonPayload;
-//
-//    if(jiraConnector==null){
-//        e = {message:"Unable to proceed with a null structure: jiraConnector"};
-//        return false,e;
-//    }
-//
-//    constructAuthHeader(request);
-//
-//    jsonPayload, err = <json>newCategory;
-//    if (err != null) {
-//        e = <JiraConnectorError, toConnectorError()>err;
-//        return false, e;
-//    }
-//
-//    request.setJsonPayload(jsonPayload);
-//
-//    response, connectionError = jiraHttpClientEP-> post("/projectCategory", request);
-//    jsonResponse, e = getValidatedResponse(response, connectionError);
-//    if (e != null) {
-//        return false, e;
-//    }
-//
-//    return true, null;
-//}
-//
-//@Description {value:"Delete a project category."}
-//@Param {value:"projectCategoryId: Jira id of the project category"}
-//@Return {value:"Returns true if the project category was deleted successfully, otherwise returns false"}
-//@Return {value:"JiraConnectorError: Error Object"}
-//public function <JiraConnector jiraConnector> deleteProjectCategory (string projectCategoryId) (boolean, JiraConnectorError) {
-//    http:Request request = {};
-//    http:Response response = {};
-//    JiraConnectorError e = {};
-//    json jsonResponse;
-//
-//    if(jiraConnector==null){
-//        e = {message:"Unable to proceed with a null structure: jiraConnector"};
-//        return false,e;
-//    }
-//
-//    constructAuthHeader(request);
-//
-//    response, connectionError = jiraHttpClientEP-> delete("/projectCategory/" + projectCategoryId, request);
-//    jsonResponse, e = getValidatedResponse(response, connectionError);
-//    if (e != null) {
-//        return false, e;
-//    }
-//    return true, null;
-//}
+@Description {value:"Deletes a project."}
+@Param {value:"projectIdOrKey: unique string which represents the project id or project key of a jira project"}
+@Return {value:"Returns true if project was deleted successfully,otherwise return false"}
+@Return {value:"JiraConnectorError: Error Object"}
+public function <JiraConnector jiraConnector> deleteProject (string projectIdOrKey) returns boolean|JiraConnectorError {
+    http:Request request = {};
+    http:Response response = {};
+    JiraConnectorError e = {};
+
+    constructAuthHeader(request);
+    var httpResponseOut = jiraHttpClientEP -> delete("/project/" + projectIdOrKey, request);
+    //Evaluate http response for connection and server errors
+    var jsonResponseOut = getValidatedResponse(httpResponseOut);
+
+    match jsonResponseOut {
+        JiraConnectorError errorOut => {
+            return errorOut;
+        }
+        json jsonResponse => {
+            return true;
+        }
+    }
+}
+
+@Description {value:"Returns all existing project categories"}
+@Return {value:"ProjectCategory[]: Array of structures which contain existing categories"}
+@Return {value:"JiraConnectorError: Error Object"}
+public function <JiraConnector jiraConnector> getAllProjectCategories () returns ProjectCategory[]|JiraConnectorError {
+    http:Request request = {};
+    http:Response response = {};
+    ProjectCategory[] projectCategories = [];
+    JiraConnectorError e = {};
+    error err = {};
+    json[] jsonResponseArray;
+
+    //Adds Authorization Header
+    constructAuthHeader(request);
+    var httpResponseOut = jiraHttpClientEP -> get("/projectCategory", request);
+    //Evaluate http response for connection and server errors
+    var jsonResponseOut = getValidatedResponse(httpResponseOut);
+    match jsonResponseOut {
+        JiraConnectorError errorOut => {
+            return errorOut;
+        }
+        json jsonResponse => {
+
+            jsonResponseArray, err = (json[])jsonResponse;
+            int i = 0;
+            foreach (jsonProjectCategory in jsonResponseArray) {
+                projectCategories[i], err = <ProjectCategory>jsonProjectCategory;
+                if (err != null) {
+                    e = <JiraConnectorError, toConnectorError()>err;
+                    return e;
+                }
+                i = i + 1;
+            }
+            return projectCategories;
+        }
+    }
+}
+
+@Description {value:"Create a new project category"}
+@Param {value:"newCategory: struct which contains the mandatory fields for new project category creation "}
+@Return {value:"Returns true if project category was created successfully,otherwise return false"}
+@Return {value:"JiraConnectorError: Error Object"}
+public function <JiraConnector jiraConnector> createProjectCategory (ProjectCategoryRequest newCategory) returns boolean|JiraConnectorError {
+    http:Request request = {};
+    http:Response response = {};
+    JiraConnectorError e = {};
+    error err = {};
+    json jsonPayload;
+
+    jsonPayload, err = <json>newCategory;
+    if (err != null) {
+        e = <JiraConnectorError, toConnectorError()>err;
+        return e;
+    }
+    request.setJsonPayload(jsonPayload);
+
+    //Adds Authorization Header
+    constructAuthHeader(request);
+    var httpResponseOut = jiraHttpClientEP -> post("/projectCategory", request);
+    //Evaluate http response for connection and server errors
+    var jsonResponseOut = getValidatedResponse(httpResponseOut);
+
+    match jsonResponseOut {
+        JiraConnectorError errorOut => {
+            return errorOut;
+        }
+        json jsonResponse => {
+            return true;
+        }
+    }
+}
+
+
+@Description {value:"Delete a project category."}
+@Param {value:"projectCategoryId: Jira id of the project category"}
+@Return {value:"Returns true if the project category was deleted successfully, otherwise returns false"}
+@Return {value:"JiraConnectorError: Error Object"}
+public function <JiraConnector jiraConnector> deleteProjectCategory (string projectCategoryId) returns boolean|JiraConnectorError {
+    http:Request request = {};
+    http:Response response = {};
+    JiraConnectorError e = {};
+
+    //Adds Authorization Header
+    constructAuthHeader(request);
+    var httpResponseOut = jiraHttpClientEP -> delete("/projectCategory/" + projectCategoryId, request);
+    //Evaluate http response for connection and server errors
+    var jsonResponseOut = getValidatedResponse(httpResponseOut);
+
+    match jsonResponseOut {
+        JiraConnectorError errorOut => {
+            return errorOut;
+        }
+        json jsonResponse => {
+            return true;
+        }
+    }
+}
 
 
 

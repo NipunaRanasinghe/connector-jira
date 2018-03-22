@@ -32,7 +32,9 @@ import ballerina.io;
 public function constructAuthHeader (http:Request request) {
 
     //read "authentication_type" field from ballerina.conf
-    request.addHeader("Authorization", "Basic " + base64EncodedString);
+    if(base64EncodedString!="") {
+        request.addHeader("Authorization", "Basic " + base64EncodedString);
+    }
 }
 
 @Description {value:"Checks whether the http response contains any errors "}
@@ -149,19 +151,19 @@ transformer <error source, JiraConnectorError target> toConnectorError() {
 }
 
 transformer <ProjectRequest source, json target> createJsonProjectRequest() {
-    target.key = source.key != null ? (json)source.key : null;
-    target.name = source.name != null ? (json)source.name : null;
-    target.projectTypeKey = source.projectTypeKey != null ? (json)source.projectTypeKey : null;
-    target.projectTemplateKey = source.projectTemplateKey != null ? (json)source.projectTemplateKey : null;
-    target.description = source.description != null ? (json)source.description : null;
-    target.lead = source.lead != null ? (json)source.lead : null;
-    target.url = source.lead != null ? (json)source.url : null;
-    target.assigneeType = source.assigneeType != null ? (json)source.assigneeType : null;
-    target.avatarId = source.avatarId != null ? (json)source.avatarId : null;
-    target.issueSecurityScheme = source.issueSecurityScheme != null ? (json)source.issueSecurityScheme : null;
-    target.permissionScheme = source.permissionScheme != null ? (json)source.permissionScheme : null;
-    target.notificationScheme = source.notificationScheme != null ? (json)source.notificationScheme : null;
-    target.categoryId = source.categoryId != null ? (json)source.categoryId : null;
+    target.key = source.key != "" ? (json)source.key : null;
+    target.name = source.name != "" ? (json)source.name : null;
+    target.projectTypeKey = source.projectTypeKey != "" ? (json)source.projectTypeKey : null;
+    target.projectTemplateKey = source.projectTemplateKey != "" ? (json)source.projectTemplateKey : null;
+    target.description = source.description != "" ? (json)source.description : null;
+    target.lead = source.lead != "" ? (json)source.lead : null;
+    target.url = source.url != "" ? (json)source.url : null;
+    target.assigneeType = source.assigneeType != "" ? (json)source.assigneeType : null;
+    target.avatarId = source.avatarId != "" ? (json)source.avatarId : null;
+    target.issueSecurityScheme = source.issueSecurityScheme != "" ? (json)source.issueSecurityScheme : null;
+    target.permissionScheme = source.permissionScheme != "" ? (json)source.permissionScheme : null;
+    target.notificationScheme = source.notificationScheme != "" ? (json)source.notificationScheme : null;
+    target.categoryId = source.categoryId != "" ? (json)source.categoryId : null;
 }
 
 transformer <json source, ProjectSummary target> createProjectSummary() {
@@ -185,8 +187,8 @@ transformer <json source, ProjectCategory target> createProjectCategory() {
 
 public function isEmpty(error|JiraConnectorError e) returns boolean{
     match e{
-        error err => return err.message!="";
-        JiraConnectorError err => return err.message!="";
+        error err => return err.message=="";
+        JiraConnectorError err => return err.message=="";
     }
 
 }
