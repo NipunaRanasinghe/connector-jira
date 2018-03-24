@@ -76,10 +76,10 @@ will return an error if the credentials are invalid.)
 
 You can easily test the following actions using the `sample.bal` file.
 
-1. Navigate to the folder `Package_Jira/samples/jira/ ` .
+1. Navigate to the folder `tests`.
 2. Run the following commands to execute the sample.
 
-    ```$ ballerina run sample.bal "Run All Samples"```
+    ```$ ballerina run test.bal "Run All Tests```
 
 
 ## Working with Jira connector actions
@@ -89,15 +89,16 @@ All the actions return two values: result and error. Results can be either`balle
 ##### Example
 * Request 
 ```ballerina
-    endpoint<jira:JiraConnector> jiraConnector {
-        create jira:JiraConnector();
-    }
+    jira:JiraConnector jiraConnector = {};
+    jira:JiraConnectorError jiraError = {};
+    jira:Project project = {};
     string projectKey = "RRDEVSPRT";
     
-    jira:Project project;
-    jira:JiraConnectorError e;
-    
-    project, e = jiraConnector.getProject(projectKey);
+    var result = jiraConnector.getProject(projectKey);
+    match result{
+        jira:Project p => project = p;
+        jira:JoraConnectorError e => jiraError = err;
+    }
     
 ```
 
