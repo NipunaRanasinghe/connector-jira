@@ -59,15 +59,18 @@ in the following sample code.(Connector will check for an existing jira user acc
 will return an error if the credentials are invalid.)
 ```Ballerina
 
-    jira:JiraConnectorError e;
+    jira:JiraConnectorError jiraConnectorError;
     boolean isValid;
     
     //Creating the jira Connector instace
     jira:JiraConnector jiraConnector = {};
 
     //this is the in-buit connctor action to get the user credentials and check the validity of the provided details.
-    isValid, e = jiraConnector.authenticate("ashan@wso2.com", "ashan123");
-    printSampleResponse(e);
+    var response = jiraConnector.authenticate("ashan@wso2.com", "ashan123");
+    match response{
+        boolean success => io:println(success);
+        jira:JiraConnectorError error => io:println(e);
+    }
 
 ```
 
@@ -487,7 +490,4 @@ use the information in the following sections to perform various operations with
 
 ## Working with Users in JIRA
 **[ To be Implemented ]**
-
-
-
 

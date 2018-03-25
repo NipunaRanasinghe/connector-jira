@@ -12,9 +12,13 @@ public function main (string[] args) {
     if (args[0]=="Run All Tests"){
         runAllTests();
     }
+    else{
+        io:println("Invalid Argument");
+    }
 }
 
 function runAllTests(){
+    io:println("\n\n");
     io:println("started running tests..\n");
 
     test_authenticate();
@@ -25,8 +29,6 @@ function runAllTests(){
     test_createProject();
     test_updateProject();
     test_deleteProject();
-
-    test_getProject();
 
     test_Project_getLeadUserDetails();
     test_Project_getRoleDetails();
