@@ -588,6 +588,40 @@ public struct JiraConnectorError {
     error[] cause;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                               Jira Issue                                                           //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+public struct Issue{
+    string self;
+    string id;
+    string key;
+    string summary;
+    string priorityId;
+    string resolutionId;
+    string statusId;
+    string creatorName;
+    string assigneeName;
+    string reporterName;
+    string createdDate;
+    string dueDate;
+    string timespent;
+    string resolutionDate;
+    string aggregatetimespent;
+    IssueType issueType;
+    IssueSummary parent;
+    ProjectSummary project;
+    json[] customFields = [];
+}
+public struct IssueSummary{
+    string self;
+    string id;
+    string key;
+    string priorityId;
+    string statusId;
+    IssueType issueType;
+}
+
 public struct IssueType {
     string self;
     string id;
