@@ -105,7 +105,7 @@ public function <JiraConnector jiraConnector> getAllProjectSummaries () returns 
 
                     int i = 0;
                     foreach (jsonProject in jsonResponseArray) {
-                        projects[i] = <ProjectSummary, createProjectSummary()>jsonProject;
+                        projects[i] = <ProjectSummary, jsonToProjectSummary()>jsonProject;
                         i = i + 1;
                     }
                     return projects;
@@ -204,7 +204,7 @@ public function <JiraConnector jiraConnector> updateProject (string projectIdOrK
     error err = {};
     json jsonPayload;
 
-    jsonPayload = <json, createJsonProjectRequest()>update;
+    jsonPayload = <json, ProjectRequestToJson()>update;
     if (!isEmpty(err)) {
         e = <JiraConnectorError, toConnectorError()>err;
         return e;
@@ -365,8 +365,6 @@ public function <JiraConnector jiraConnector> deleteProjectCategory (string proj
         }
     }
 }
-
-
 
 
 

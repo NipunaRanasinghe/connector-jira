@@ -553,15 +553,6 @@ public struct ProjectRequest {
     string categoryId;
 }
 
-public struct IssueType {
-    string self;
-    string id;
-    string name;
-    string description;
-    string iconUrl;
-    boolean subtask;
-}
-
 public struct ProjectVersion {
     string self;
     string id;
@@ -595,4 +586,13 @@ public struct JiraConnectorError {
     string message;
     json jiraServerErrorLog;
     error[] cause;
+}
+
+public struct IssueType {
+    string self;
+    string id;
+    string name;
+    string description;
+    string iconUrl;
+    boolean subtask;
 }
