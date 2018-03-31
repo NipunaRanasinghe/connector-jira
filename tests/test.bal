@@ -9,15 +9,54 @@ boolean isValid;
 jira:JiraConnector jiraConnector = {};
 
 public function main (string[] args) {
-    if (args[0]=="Run All Tests"){
-        runAllTests();
+    //if (args[0]=="Run All Tests"){
+    //    runAllTests();
+    //}
+    //else{
+    //    io:println("Invalid Argument");
+    //}
+
+    test_authenticate();
+
+    //var out = jiraConnector.getIssue("10315");
+    //match out {
+    //    jira:Issue issue => io:println(issue);
+    //    jira:JiraConnectorError e => io:println(e);
+    //}
+
+
+    jira:Issue issue ={};
+
+    test_createProject();
+
+    jira:IssueRequest newIssue = {
+         key:"TESTISSUE",
+         summary:"This is a test issue created for Ballerina Jira Connector",
+         issueTypeId:"4",
+         projectKey:"TESTPROJECT",
+         assigneeName:"inshaf@wso2.com"
+     };
+
+    var out2 = jiraConnector.createIssue(newIssue);
+    match out2 {
+        jira:Issue is => issue = is;
+        jira:JiraConnectorError e => io:println(e);
     }
-    else{
-        io:println("Invalid Argument");
+
+    var out3 = jiraConnector.deleteIssue(issue.key);
+    match out3 {
+        boolean => io:println("deleted");
+        jira:JiraConnectorError e => io:println(e);
     }
+
+
+
+
+
+    test_deleteProject();
 }
 
-function runAllTests(){
+function runAllTests () {
     io:println("\n\n");
     io:println("started running tests..\n");
 

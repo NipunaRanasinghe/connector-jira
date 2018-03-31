@@ -23,7 +23,6 @@ import ballerina/util;
 import ballerina/log;
 import ballerina/io;
 
-
 //Creates package-global Http client endpoint for jira REST API
 endpoint http:ClientEndpoint jiraHttpClientEP {targets:[{uri:WSO2_STAGING_JIRA_REST_API_ENDPOINT}], chunking:http:Chunking.NEVER};
 http:HttpConnectorError connectionError;
@@ -40,10 +39,10 @@ public struct JiraConnector {
     string base_url;
 }
 
-public function <JiraConnector jiraConnector> JiraConnector() {
+public function <JiraConnector jiraConnector> JiraConnector () {
 
-    jira_base_url = jiraConnector.base_url==""?WSO2_STAGING_JIRA_BASE_URL:jiraConnector.base_url;
-    jira_authentication_ep = jira_base_url+"/jira/rest/auth/1/session/";
+    jira_base_url = jiraConnector.base_url == "" ? WSO2_STAGING_JIRA_BASE_URL : jiraConnector.base_url;
+    jira_authentication_ep = jira_base_url + "/jira/rest/auth/1/session/";
     jira_rest_api_uri = jira_base_url + JIRA_REST_API_RESOURCE + JIRA_REST_API_VERSION;
 
     http:ClientEndpointConfiguration jiraHttpClientConfig = {targets:[{uri:jira_rest_api_uri}], chunking:http:Chunking.NEVER};
@@ -54,7 +53,8 @@ public function <JiraConnector jiraConnector> JiraConnector() {
 @Description {value:"stores and validates jira account credentials given by the by the user"}
 @Param {value:"username: jira account username"}
 @Param {value:"password:jira account password"}
-@Return {value:"Returns false if the login fails due to invalid credentials or if the login is denied due to a CAPTCHA requirement, throtting, or any other reason.Otherwise returns true"}
+@Return {value:"Returns false if the login fails due to invalid credentials or if the login is denied due to a CAPTCHA
+requirement, throtting, or any other reason.Otherwise returns true"}
 @Return {value:"JiraConnectorError: Error Object"}
 
 public function <JiraConnector jiraConnector> authenticate (string username, string password) returns boolean|JiraConnectorError {
@@ -136,7 +136,9 @@ public function <JiraConnector jiraConnector> getProject (string projectIdOrKey)
             return errorOut;
         }
         json jsonResponse => {
-            jsonResponse.leadName = jsonResponse.lead != null ? jsonResponse.lead.name != null ? jsonResponse.lead.name : null : null;
+            jsonResponse.leadName = jsonResponse.lead != null ?
+                                    jsonResponse.lead.name != null ?
+                                    jsonResponse.lead.name : null : null;
             var projectOut = <Project>jsonResponse;
             match projectOut {
                 error err => {
@@ -147,8 +149,6 @@ public function <JiraConnector jiraConnector> getProject (string projectIdOrKey)
                     return project;
                 }
             }
-
-
         }
     }
 }
@@ -336,9 +336,7 @@ public function <JiraConnector jiraConnector> createProjectCategory (ProjectCate
                 }
             }
         }
-
     }
-
 }
 
 @Description {value:"Delete a project category."}
@@ -367,6 +365,73 @@ public function <JiraConnector jiraConnector> deleteProjectCategory (string proj
 }
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+public function <JiraConnector jiraConnector> getIssue (string issueIdOrKey) returns Issue|JiraConnectorError {
+    http:Request request = {};
+    http:Response response = {};
 
+    //Adds Authorization Header
+    constructAuthHeader(request);
+    var httpResponseOut = jiraHttpClientEP -> get("/issue/" + issueIdOrKey, request);
+    //Evaluate http response for connection and server errors
+    var jsonResponseOut = getValidatedResponse(httpResponseOut);
 
+    match jsonResponseOut {
+        JiraConnectorError e => {
+            return e;
+        }
+        json jsonResponse => {
+            var issue = jsonToIssue(jsonResponse);
+            return issue;
+        }
+    }
+}
+
+public function <JiraConnector jiraConnector> createIssue (IssueRequest newIssue) returns Issue|JiraConnectorError {
+    http:Request request = {};
+    http:Response response = {};
+
+    json jsonPayload = issueRequestToJson(newIssue);
+
+    request.setJsonPayload(jsonPayload);
+
+    //Adds Authorization Header
+    constructAuthHeader(request);
+    var httpResponseOut = jiraHttpClientEP -> post("/issue", request);
+    //Evaluate http response for connection and server errors
+    var jsonResponseOut = getValidatedResponse(httpResponseOut);
+
+    match jsonResponseOut {
+        JiraConnectorError e => {
+            return e;
+        }
+        json jsonResponse => {
+            var issueOut = jiraConnector.getIssue(jsonResponse.key.toString());
+            match issueOut {
+                Issue issue => return issue;
+                JiraConnectorError e => return e;
+            }
+        }
+    }
+}
+
+public function <JiraConnector jiraConnector> deleteIssue (string issueIdOrKey) returns boolean|JiraConnectorError {
+    http:Request request = {};
+    http:Response response = {};
+
+    //Adds Authorization Header
+    constructAuthHeader(request);
+    var httpResponseOut = jiraHttpClientEP -> delete("/issue/"+issueIdOrKey, request);
+    //Evaluate http response for connection and server errors
+    var jsonResponseOut = getValidatedResponse(httpResponseOut);
+
+    match jsonResponseOut {
+        JiraConnectorError e => {
+            return e;
+        }
+        json jsonResponse => {
+            return true;
+        }
+    }
+}

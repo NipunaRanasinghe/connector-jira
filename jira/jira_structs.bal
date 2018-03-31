@@ -19,7 +19,6 @@
 package jira;
 import ballerina/net.http;
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                               Jira Project                                                         //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -597,12 +596,15 @@ public struct Issue{
     string id;
     string key;
     string summary;
+
     string priorityId;
     string resolutionId;
     string statusId;
+
     string creatorName;
     string assigneeName;
     string reporterName;
+
     string createdDate;
     string dueDate;
     string timespent;
@@ -613,6 +615,22 @@ public struct Issue{
     ProjectSummary project;
     json[] customFields = [];
 }
+
+
+public struct IssueRequest{
+
+    string key;
+    string summary;
+
+    string issueTypeId;
+    string projectKey;
+    string parentIssueKey;
+    string assigneeName;
+
+    string dueDate;
+}
+
+
 public struct IssueSummary{
     string self;
     string id;
@@ -628,5 +646,5 @@ public struct IssueType {
     string name;
     string description;
     string iconUrl;
-    boolean subtask;
+    string avatarId;
 }

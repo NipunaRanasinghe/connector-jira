@@ -163,12 +163,12 @@ transformer <ProjectRequest source, json target> ProjectRequestToJson() {
 }
 
 transformer <json source, ProjectSummary target> jsonToProjectSummary() {
-    target.self = source.self.toString();
-    target.id = source.id.toString();
-    target.key = source.key.toString();
-    target.name = source.name.toString();
+    target.self = source.self != null ? source.self.toString() : "";
+    target.id = source.id != null ? source.id.toString() : "";
+    target.key = source.key != null ? source.key.toString() : "";
+    target.name = source.name != null ? source.name.toString() : "";
     target.description = source.description != null ? source.description.toString() : "";
-    target.projectTypeKey = source.projectTypeKey.toString();
+    target.projectTypeKey = source.projectTypeKey != null ? source.projectTypeKey.toString() : "";
     target.category = source.projectCategory != null ? source.projectCategory.name.toString() : "";
 }
 
@@ -179,14 +179,15 @@ transformer <json source, ProjectCategory target> jsonToProjectCategory() {
     target.description = source.description != null ? source.description.toString() : "";
 }
 
-function isEmpty (error|JiraConnectorError e) returns boolean {
+
+public function isEmpty (error|JiraConnectorError e) returns boolean {
     match e {
         error err => return err.message == "";
         JiraConnectorError err => return err.message == "";
     }
 }
 
-function jsonToIssue (json source) returns Issue|error {
+function jsonToIssue (json source) returns Issue {
     Issue target = {};
     target.self = source.self.toString();
     target.id = source.id.toString();
@@ -235,16 +236,16 @@ function jsonToIssue (json source) returns Issue|error {
                                 source.fields.aggregatetimespent.toString() : "" : "";
 
     target.createdDate = source.fields != null ?
-                         source.fields.createdDate != null ?
-                         source.fields.createdDate.toString() : "" : "";
+                         source.fields.created != null ?
+                         source.fields.created.toString() : "" : "";
 
     target.dueDate = source.fields != null ?
-                     source.fields.dueDate != null ?
-                     source.fields.dueDate.toString() : "" : "";
+                     source.fields.duedate != null ?
+                     source.fields.duedate.toString() : "" : "";
 
     target.resolutionDate = source.fields != null ?
-                            source.fields.resolutionDate != null ?
-                            source.fields.resolutionDate.toString() : "" : "";
+                            source.fields.resolutiondate != null ?
+                            source.fields.resolutiondate.toString() : "" : "";
 
     target.project = source.fields != null ?
                      source.fields.project != null ?
@@ -254,23 +255,15 @@ function jsonToIssue (json source) returns Issue|error {
                     source.fields.parent != null ?
                     jsonToIssueSummary(source.fields.parent) : {} : {};
 
-    json jsonIssueType = source.fields != null ?
-                         source.fields.issueType != null ?
-                         source.fields.issueType : null : null;
-    if (jsonIssueType != null) {
-        var out = <IssueType>jsonIssueType;
-        match out {
-            IssueType issueType => target.issueType = issueType;
-            error e => target.issueType = {};
-        }
-    } else {
-        target.issueType = {};
-    }
+    target.issueType = source.fields != null ?
+                       source.fields.issuetype != null ?
+                       jsonToIssueType(source.fields.issuetype) : {} : {};
 
     int i = 0;
-    foreach (field in source.fields.getKeys()) {
-        if (field.hasPrefix("custom_field")) {
-            target.customFields[i] = source.fields.field;
+    foreach (fieldName in source.fields.getKeys()) {
+
+        if (fieldName.hasPrefix("customfield")) {
+            target.customFields[i] = {(fieldName):source.fields[fieldName]};
             i = i + 1;
         }
     }
@@ -285,28 +278,50 @@ function jsonToIssueSummary (json source) returns IssueSummary {
     target.id = source.id.toString();
     target.key = source.key.toString();
 
-    target.priorityId = source.priority != null ?
-                        source.priority.id != null ?
-                        source.priority.id.toString() : "" : "";
+    target.priorityId = source.fields != null ?
+                        source.fields.priority != null ?
+                        source.fields.priority.id != null ?
+                        source.fields.priority.id.toString() : "" : "" : "";
 
-    target.statusId = source.status != null ?
-                      source.status.id != null ?
-                      source.status.id.toString() : "" : "";
+    target.statusId = source.fields != null ?
+                      source.fields.status != null ?
+                      source.fields.status.id != null ?
+                      source.fields.status.id.toString() : "" : "" : "";
 
-    json jsonIssueType = source.fields != null ?
-                         source.fields.issueType != null ?
-                         source.fields.issueType : null : null;
-    if (jsonIssueType != null) {
-        var out = <IssueType>jsonIssueType;
-        match out {
-            IssueType issueType => target.issueType = issueType;
-            error e => target.issueType = {};
-        }
-    } else {
-        target.issueType = {};
-    }
+    target.issueType = source.fields != null ?
+                       source.fields.issuetype != null ?
+                       jsonToIssueType(source.fields.issuetype) : {} : {};
 
     return target;
 }
 
+function jsonToIssueType (json source) returns IssueType {
+    IssueType target = {};
 
+    target.self = source.self != null ? source.self.toString() : "";
+    target.id = source.id != null ? source.id.toString() : "";
+    target.name = source.name != null ? source.name.toString() : "";
+    target.description = source.description != null ? source.description.toString() : "";
+    target.iconUrl = source.iconUrl != null ? source.iconUrl.toString() : "";
+    target.avatarId = source.avatarId != null ? source.avatarId.toString() : "";
+
+    return target;
+}
+
+function issueRequestToJson (IssueRequest source) returns json {
+
+    json target = {fields:{}};
+
+    target.key = source.key != "" ? source.key : null;
+    target.fields.summary = source.summary != "" ? source.summary : null;
+
+    target.fields.issuetype = source.issueTypeId != "" ? {id:source.issueTypeId} : null;
+    target.fields.project = source.projectKey != "" ? {key:source.projectKey} : null;
+
+    target.fields.assignee = source.assigneeName != "" ? {name:source.assigneeName} : null;
+
+
+    io:println(target);
+    return target;
+
+}
